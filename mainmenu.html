@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TileTether - Menu</title>
+  <style>
+    :root{
+      /* Palet Warna Baru: Emas, Coklat, Hijau, Biru, Merah */
+      --gold: #ffd700;
+      --gold-dark: #d4af37;
+      --brown: #8b4513;
+      --brown-dark: #5c2a0d;
+      --green: #4caf50;
+      --green-dark: #2e7d32;
+      --blue: #1976d2;
+      --blue-dark: #0d47a1;
+      --red: #d32f2f;
+      --red-dark: #b71c1c;
+      
+      --text: #fff;
+      --shadow: 0 4px 0 rgba(0,0,0,.55), 0 10px 24px rgba(0,0,0,.3);
+    }
+    
+    *{ box-sizing:border-box; margin:0; padding:0; user-select:none; -webkit-tap-highlight-color: transparent; }
+    html, body { width:100%; height:100%; overflow:hidden; }
+    
+    body{
+      font-family: "Courier New", Courier, monospace;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 15%, rgba(255,255,255,.15) 0 6%, transparent 7%),
+                  radial-gradient(circle at 78% 18%, rgba(255,255,255,.1) 0 4%, transparent 5%),
+                  linear-gradient(to bottom, var(--blue-dark) 0%, var(--blue) 45%, var(--green) 45.2%, var(--green-dark) 100%);
+      position:relative;
+    }
+    
+    body::before{
+      content:""; position:fixed; inset:0;
+      background: linear-gradient(to bottom, rgba(0,0,0,.3), rgba(0,0,0,0) 40%), url('paths/path_01.png') center center / cover no-repeat;
+      opacity:.2; filter: blur(2px); pointer-events:none;
+    }
+    
+    .app{ position:relative; width:100vw; height:100vh; display:flex; flex-direction:column; padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) 14px; overflow:hidden; }
+    
+    .coin-display{ display:flex; align-items:center; gap:8px; min-width: 92px; width:max-content; padding:8px 12px; background: linear-gradient(180deg, var(--gold), var(--gold-dark)); color:var(--brown-dark); border: 3px solid #fff; outline: 3px solid var(--brown-dark); box-shadow: var(--shadow); font-weight:900; text-shadow:none; }
+    .coin-icon{ width:18px; height:18px; image-rendering:pixelated; object-fit:contain; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.35)); }
+    
+    @keyframes floatLogo{ 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
+    
+    /* Perubahan Menu Shell: flex-start untuk menggeser ke atas, dan padding-top untuk gap */
+    .menu-shell{ flex:1; display:flex; align-items:flex-start; justify-content:center; position:relative; z-index:3; padding: 6vh 0 16px 0; }
+    
+    .menu-stack{ 
+      width: min(100%, 360px); 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
+    
+    .menu-logo {
+      width: 100%;
+      aspect-ratio: 6 / 1;
+      object-fit: contain;
+      align-self: center;
+      margin-bottom: 12px;
+      filter: drop-shadow(3px 3px 0 #000) drop-shadow(0 0 12px rgba(255,215,0,.3));
+      animation: floatLogo 2.8s ease-in-out infinite;
+    }
+    
+    .menu-entry{ 
+      width: 100%; 
+      border: 3px solid var(--gold); 
+      outline: 3px solid var(--brown-dark); 
+      background: linear-gradient(180deg, var(--brown), var(--brown-dark)); 
+      color: #fff; 
+      box-shadow: var(--shadow); 
+      padding: 10px 14px; 
+      cursor: pointer; 
+      text-align: left; 
+      display: flex; 
+      align-items: center; 
+      justify-content: flex-start;
+      gap: 12px; 
+      position: relative; 
+      overflow: hidden; 
+    }
+    .menu-entry::before{ content:""; position:absolute; inset:0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 8px, rgba(255,255,255,0) 8px 16px); pointer-events:none; }
+    .menu-entry:hover{ transform: translateY(-2px); border-color:#fff; }
+    .menu-entry:active{ transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.5); }
+    
+    .menu-entry .left{ display:flex; flex-direction:column; gap:2px; position:relative; z-index:1; flex: 1; }
+    .menu-entry .title{ font-size:14px; line-height:1; font-weight:900; letter-spacing:1px; text-transform:uppercase; text-shadow: 2px 2px 0 #000; }
+    .menu-entry .desc{ font-size:10px; color: var(--gold); letter-spacing:.8px; text-transform:uppercase; text-shadow: 1px 1px 0 #000; }
+    
+    .menu-entry .right{ font-size:12px; font-weight:900; color: var(--gold); text-shadow: 2px 2px 0 #000; text-transform:uppercase; position:relative; z-index:1; flex-shrink:0; text-align:right; margin-left: auto; }
+    
+    .menu-entry.primary{ background: linear-gradient(180deg, var(--red), var(--red-dark)); border-color: var(--gold); }
+    .menu-entry.primary .desc{ color:#fff; }
+    
+    .character-dock { position: fixed; right: 14px; bottom: 14px; z-index: 18; width: min(40vw, 160px); min-width: 130px; background: linear-gradient(180deg, var(--brown), var(--brown-dark)); border: 3px solid var(--gold); outline: 3px solid #000; box-shadow: var(--shadow); padding: 10px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s; }
+    .character-dock:active { transform: translateY(2px); }
+    .dock-top { display: flex; justify-content: space-between; align-items: center; }
+    .dock-title { font-size: 10px; font-weight: 900; color: var(--gold); text-transform: uppercase; text-shadow: 1px 1px 0 #000; }
+    .dock-tag { font-size: 9px; font-weight: 900; color: #fff; text-transform: uppercase; background: var(--blue); padding: 2px 5px; border: 1px solid #000; border-radius: 4px; box-shadow: 1px 1px 0 #000; }
+    
+    /* Perubahan Dock Avatar: Penambahan properti background cover untuk menampilkan Path */
+    .dock-avatar { position: relative; height: 100px; display: flex; align-items: flex-end; justify-content: center; gap: 6px; background-color: rgba(0,0,0,0.6); background-size: cover; background-position: center; border: 2px solid rgba(255,215,0,0.2); overflow: hidden; border-radius: 4px; padding-bottom: 5px; }
+    .dock-avatar img { height: 80px; width: auto; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.6)); }
+    
+    .dock-name { text-align: center; font-size: 13px; font-weight: 900; color: #fff; text-transform: uppercase; text-shadow: 2px 2px 0 #000; }
+    
+    .popup-overlay{ position:fixed; inset:0; background: rgba(0,0,0,.8); backdrop-filter: blur(3px); z-index:1000; display:none; align-items:center; justify-content:center; padding:12px; }
+    .popup-box{ position:relative; width:100%; max-width: 410px; max-height: 88vh; display:flex; flex-direction:column; gap:12px; padding: 20px 16px 16px; background: linear-gradient(180deg, var(--brown), var(--brown-dark)); border: 4px solid var(--gold); outline: 4px solid #000; box-shadow: var(--shadow); overflow:hidden; }
+    .popup-title{ font-size:18px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color: var(--gold); text-shadow: 2px 2px 0 #000; text-align:center; border-bottom: 2px dashed rgba(255,215,0,.3); padding-bottom: 10px; }
+    
+    .btn{ position:relative; border: 3px solid var(--gold); outline: 3px solid #000; background: linear-gradient(180deg, var(--blue), var(--blue-dark)); color:#fff; font-family:inherit; font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:1px; cursor:pointer; padding: 12px 14px; box-shadow: 0 4px 0 rgba(0,0,0,.5); text-shadow: 2px 2px 0 #000; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+    .btn:hover{ filter:brightness(1.1); border-color:#fff; }
+    .btn:active{ transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.5); }
+    .btn-green{ background: linear-gradient(180deg, var(--green), var(--green-dark)); }
+    .btn-red{ background: linear-gradient(180deg, var(--red), var(--red-dark)); }
+    
+    .custom-toggle-wrapper{ display:flex; justify-content:center; margin: 4px 0 8px; }
+    .mode-switch-track{ position:relative; width:100%; max-width:280px; height:48px; display:flex; cursor:pointer; background: #000; border: 3px solid var(--gold); box-shadow: inset 0 2px 5px rgba(0,0,0,.8); }
+    .mode-switch-thumb{ position:absolute; top:2px; left:2px; width: calc(50% - 4px); height: calc(100% - 4px); background: linear-gradient(180deg, var(--green), var(--green-dark)); transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1); pointer-events:none; border: 2px solid rgba(255,255,255,.2); }
+    .mode-switch-track.p2-active .mode-switch-thumb{ transform: translateX(100%); background: linear-gradient(180deg, var(--blue), var(--blue-dark)); }
+    .mode-option{ flex:1; display:flex; align-items:center; justify-content:center; z-index:1; font-size:13px; font-weight:900; letter-spacing:1px; text-transform:uppercase; text-shadow: 2px 2px 0 #000; }
+    
+    .roller-stage{ position:relative; width:100%; height: 150px; display:flex; align-items:center; justify-content:center; perspective: 900px; margin: 4px 0; cursor:grab; touch-action: pan-y; }
+    .roller-card{ position:absolute; width: 96px; height: 110px; padding: 8px; background: linear-gradient(180deg, #d2b48c, #8b4513); border: 3px solid #000; outline: 2px solid rgba(255,255,255,.2); box-shadow: 0 5px 0 rgba(0,0,0,.5); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; transition: transform .25s ease, opacity .25s ease, filter .2s ease; overflow:hidden; }
+    .roller-card img{ width: 50px; height: 50px; object-fit:contain; image-rendering:pixelated; pointer-events:none; filter: drop-shadow(2px 3px 0 rgba(0,0,0,.4)); }
+    .roller-card .item-name{ width:100%; font-size:10px; font-weight:900; color:#fff; text-shadow: 1px 1px 0 #000; text-transform:uppercase; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .lock-icon-svg{ width:18px; height:18px; fill: var(--red); position:absolute; top:4px; right:4px; pointer-events:none; filter: drop-shadow(1px 1px 0 #000); }
+    
+    .char-tabs{ display:flex; gap:10px; margin-bottom: 5px; }
+    .char-tab-btn{ flex:1; padding: 10px; background: linear-gradient(180deg, #444, #222); border: 3px solid #000; color:#fff; font-size:12px; font-weight:900; text-transform:uppercase; cursor:pointer; box-shadow: 0 4px 0 rgba(0,0,0,.5); text-shadow: 1px 1px 0 #000; }
+    .char-tab-btn.active-p1{ background: linear-gradient(180deg, var(--blue), var(--blue-dark)); border-color: var(--gold); }
+    .char-tab-btn.active-p2{ background: linear-gradient(180deg, var(--red), var(--red-dark)); border-color: var(--gold); }
+    
+    .shop-section{ border: 3px solid var(--gold); padding: 12px; background: rgba(0,0,0,.3); margin-bottom:12px; }
+    .shop-section-title{ font-weight:900; font-size:13px; color: #fff; margin-bottom:8px; padding-bottom:6px; border-bottom: 2px solid var(--gold); text-transform:uppercase; letter-spacing:1px; text-shadow: 2px 2px 0 #000; text-align:center; background: var(--brown-dark); }
+    .shop-item-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom: 1px dashed rgba(255,215,0,.3); padding: 10px 0; }
+    .shop-item-row:last-child{ border-bottom:none; padding-bottom:0; }
+    .shop-item-info{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+    .shop-item-icon{ width:40px; height:40px; background: rgba(0,0,0,.5); border: 2px solid var(--gold); image-rendering:pixelated; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+    .shop-item-icon img{ width:85%; height:85%; object-fit:contain; }
+    .shop-btn{ padding: 8px 10px; font-size:12px; flex-shrink:0; }
+    
+    .btn-inline{ width:100%; }
+    .modal-stack{ display:flex; flex-direction:column; gap:12px; flex:1; overflow:auto; padding-right:4px; margin-bottom:10px;}
+    
+    #shopModal .popup-box{ height: 86vh; max-width: 440px; }
+    #messageModal .popup-box{ max-width: 360px; }
+    #msgModalText{ font-size: 14px; line-height:1.5; color:#fff; font-weight:900; text-align:center; text-shadow:2px 2px 0 #000; }
+    
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; border: 1px solid #000; }
+    
+    @media (max-width: 420px){
+      .app{ padding: 12px 10px calc(12px + env(safe-area-inset-bottom)) 10px; }
+      .menu-entry .title{ font-size:13px; }
+      .character-dock{ width: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <audio id="bgmMenu" src="audio/bgm_menu.mp3" loop></audio>
+    <audio id="sfxClick" src="audio/click.mp3"></audio>
+
+    <main class="menu-shell">
+      <section class="menu-stack">
+        
+        <img src="logo.png" alt="TileTether" class="menu-logo" onerror="this.style.display='none'">
+        
+        <button class="menu-entry primary" onclick="startGame()">
+          <div class="left">
+            <div class="title">Mainkan</div>
+            <div class="desc">Masuk ke arena sekarang</div>
+          </div>
+          <div class="right">▶</div>
+        </button>
+        
+        <button class="menu-entry" onclick="openModeModal()">
+          <div class="left">
+            <div class="title">Mode</div>
+            <div class="desc">Atur lawan bermain</div>
+          </div>
+          <div class="right" id="dashModeText">VS AI</div>
+        </button>
+        
+        <!-- Penampil gambar Path dihapus di sini, diganti dengan hanya menyisakan textnya -->
+        <button class="menu-entry" onclick="openPathModal()">
+          <div class="left">
+            <div class="title">Arena</div>
+            <div class="desc">Pilih peta pertarungan</div>
+          </div>
+          <div class="right" id="dashPathText">DEFAULT</div>
+        </button>
+        
+        <button class="menu-entry" onclick="openShop()">
+          <div class="left">
+            <div class="title">Toko</div>
+            <div class="desc">Beli karakter & item</div>
+          </div>
+          <div class="right" style="display:flex; align-items:center; gap:8px;">
+          </div>
+        </button>
+      </section>
+    </main>
+
+    <!-- Character Dock di Kanan Bawah -->
+    <aside class="character-dock" onclick="openCharModal()">
+      <div class="dock-top">
+        <div class="dock-title">Pemain</div>
+        <div class="dock-tag" id="dockModeTag">VS AI</div>
+      </div>
+      <div class="dock-avatar">
+        <img src="characters/bob/idle_1.png" id="mainCharImg" onerror="this.style.display='none'">
+        <img src="characters/alice/idle_1.png" id="mainCharImgP2" style="display:none;" onerror="this.style.display='none'">
+      </div>
+      <div class="dock-name" id="dockCharName">BOB</div>
+    </aside>
+
+    <!-- MODAL CHOOSE MODE -->
+    <div class="popup-overlay" id="modeModal">
+      <div class="popup-box">
+        <div class="popup-title">Pilih Mode</div>
+        <div class="custom-toggle-wrapper">
+          <div class="mode-switch-track" id="modeSwitchTrack" onclick="toggleMode()">
+            <div class="mode-switch-thumb"></div>
+            <div class="mode-option" id="optAI">VS AI</div>
+            <div class="mode-option" id="optP2">2 PLAYER</div>
+          </div>
+        </div>
+        <button class="btn btn-green btn-inline" onclick="closeModal('modeModal')">Simpan</button>
+      </div>
+    </div>
+
+    <!-- MODAL THEME -->
+    <div class="popup-overlay" id="pathModal">
+      <div class="popup-box">
+        <div class="popup-title">Pilih Arena</div>
+        <div class="roller-stage" id="pathRollerStage"></div>
+        <div style="margin-top: 5px; text-align:center;">
+          <span id="pathRollerLabel" style="font-weight: 900; font-size: 16px; color: var(--gold); text-shadow: 2px 2px 0 #000;">DEFAULT</span>
+        </div>
+        <button class="btn btn-green btn-inline" style="margin-top: 12px;" onclick="closeModal('pathModal')">Pilih</button>
+      </div>
+    </div>
+
+    <!-- MODAL CHAR -->
+    <div class="popup-overlay" id="charModal">
+      <div class="popup-box">
+        <div class="popup-title">Pilih Karakter</div>
+        <div class="char-tabs" id="charTabsContainer" style="display:none;">
+          <button class="char-tab-btn active-p1" id="tabP1Btn" onclick="switchCharTab(1)">Pemain 1</button>
+          <button class="char-tab-btn" id="tabP2Btn" onclick="switchCharTab(2)">Pemain 2</button>
+        </div>
+        <div class="roller-stage" id="charRollerStage"></div>
+        <div style="margin-top: 5px; text-align:center;">
+          <span id="charRollerLabel" style="font-weight: 900; font-size: 16px; color: var(--gold); text-shadow: 2px 2px 0 #000;">BOB</span>
+        </div>
+        <button class="btn btn-green btn-inline" style="margin-top: 12px;" onclick="closeModal('charModal')">Pilih</button>
+      </div>
+    </div>
+
+    <!-- MODAL SHOP -->
+    <div class="popup-overlay" id="shopModal">
+      <div class="popup-box">
+        <div class="popup-title">Toko</div>
+        <div class="coin-display" id="shopCoinDisplay" style="margin: 0 auto 10px auto; justify-content:center;">COINS: 0</div>
+        <div id="shopContent" class="modal-stack"></div>
+        <button class="btn btn-red btn-inline" onclick="closeShop()">Tutup</button>
+      </div>
+    </div>
+
+    <!-- MODAL MESSAGE -->
+    <div class="popup-overlay" id="messageModal">
+      <div class="popup-box">
+        <div class="popup-title" id="msgModalTitle">Info</div>
+        <p id="msgModalText"></p>
+        <div id="msgModalButtons" style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+          <button class="btn btn-blue btn-inline" onclick="closeModal('messageModal')">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data & Setup
+    let totalCoins = parseInt(localStorage.getItem('gfd_coins')) || 0;
+    let unlockedChars = JSON.parse(localStorage.getItem('tether_unlocked_chars')) || ['bob', 'alice'];
+    let unlockedPaths = JSON.parse(localStorage.getItem('tether_unlocked_paths')) || ['path_01', 'path_02', 'path_03', 'path_04', 'path_05'];
+    let itemsInventory = {
+      snail_bait: parseInt(localStorage.getItem('tether_snail_bait')) || 0,
+      antidead: parseInt(localStorage.getItem('tether_antidead')) || 0,
+      stalestill: parseInt(localStorage.getItem('tether_stalestill')) || 0,
+      glidesteps: parseInt(localStorage.getItem('tether_glidesteps')) || 0,
+      incognito: parseInt(localStorage.getItem('tether_incognito')) || 0
+    };
+    
+    // Konfigurasi Nama Baru untuk Path
+    const PATH_NAMES = {
+      path_01: 'Default',
+      path_02: 'Grass',
+      path_03: 'Water',
+      path_04: 'Abyss',
+      path_05: 'Swamp',
+      path_06: 'Winter',
+      path_07: 'Trail',
+      path_08: 'Clockwork',
+      path_09: 'Blossom',
+      path_10: 'Barren',
+      path_11: 'Dungeon',
+      path_12: 'Arcane',
+      path_13: 'Palace',
+      path_14: 'Void',
+      path_15: 'Fungal',
+      path_16: 'Ruins',
+      path_17: 'Cyber'
+    };
+    
+    const ITEM_METADATA = {
+      snail_bait: { name: "Snail Bait", img: "characters/siput/siput_1.png", max: 10 },
+      antidead: { name: "Antidead", img: "items/antidead.png", max: 3 },
+      stalestill: { name: "Stalestill", img: "items/stalestill.png", max: 5 },
+      glidesteps: { name: "Glidesteps", img: "items/glidesteps.png", max: 10 },
+      incognito: { name: "Incognito", img: "items/incognito.png", max: 5 }
+    };
+    
+    const CHAR_PRICES = { dany: 150, choco: 300, greg: 500, eva: 750, ipul: 1000, jessy: 1500, fifi: 3000 };
+    const CHAR_MULTIS = { bob: 1.0, alice: 1.0, dany: 1.2, choco: 1.4, greg: 1.6, eva: 1.8, ipul: 2.0, jessy: 2.2, fifi: 3.5 };
+    const DISPLAY_CHARACTERS = ['bob', 'alice', 'dany', 'choco', 'greg', 'eva', 'fifi', 'ipul', 'jessy'];
+    const ALL_PATHS = Array.from({length: 17}, (_, i) => `path_${(i+1).toString().padStart(2, '0')}`);
+    const COIN_IMG = `<img src="characters/fifi/jejak.png" class="coin-icon" alt="coin" onerror="this.style.display='none'">`;
+    const SVG_LOCK = `<svg class="lock-icon-svg" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`;
+    const audio = { menu: document.getElementById('bgmMenu'), click: document.getElementById('sfxClick') };
+    let state = { mode: 'ai', p1Char: 'bob', p2Char: 'alice', pathTheme: 'path_01' };
+    let rollerIdx = { path: 0, char: 0 };
+    let activeCharPlayerTab = 1;
+
+    // Events
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.btn, .menu-entry, .roller-card, .mode-switch-track, .char-tab-btn, .character-dock')) {
+        audio.click.currentTime = 0; audio.click.play().catch(()=>{});
+      }
+    });
+    document.body.addEventListener('click', () => { if (audio.menu.paused) audio.menu.play().catch(()=>{}); }, { once: true });
+
+    // UI Updates
+    function updateDashboard() {
+      const modeText = state.mode === 'ai' ? 'VS AI' : '2 PLAYER';
+      document.getElementById('dashModeText').innerText = modeText;
+      
+      // Update Nama Arena (Path)
+      const pathDisplayName = PATH_NAMES[state.pathTheme] || state.pathTheme;
+      document.getElementById('dashPathText').innerText = pathDisplayName.toUpperCase();
+      
+      // Update Dock
+      document.getElementById('dockModeTag').innerText = modeText;
+      const mainImg = document.getElementById('mainCharImg');
+      const p2Img = document.getElementById('mainCharImgP2');
+      const dockName = document.getElementById('dockCharName');
+      const dockAvatar = document.querySelector('.dock-avatar');
+      
+      if (dockAvatar) {
+        // Tampilkan gambar latar belakang dock sesuai path yang dipilih
+        dockAvatar.style.backgroundImage = `url('paths/${state.pathTheme}.png')`;
+      }
+
+      if (mainImg) mainImg.src = `characters/${state.p1Char}/idle_1.png`;
+      if (p2Img) {
+        if (state.mode === 'p2') {
+          p2Img.style.display = 'block';
+          p2Img.src = `characters/${state.p2Char}/idle_1.png`;
+        } else {
+          p2Img.style.display = 'none';
+        }
+      }
+      if (dockName) {
+        dockName.innerText = state.mode === 'p2' ? `${state.p1Char} VS ${state.p2Char}`.toUpperCase() : state.p1Char.toUpperCase();
+      }
+    }
+
+    // Animation
+    const idleSequence = [1, 2, 3, 2];
+    let currentIdleStep = 0;
+    setInterval(() => {
+      currentIdleStep = (currentIdleStep + 1) % idleSequence.length;
+      let frame = idleSequence[currentIdleStep];
+      let mainImg = document.getElementById('mainCharImg');
+      if (mainImg && state.p1Char) mainImg.src = `characters/${state.p1Char}/idle_${frame}.png`;
+      let p2Img = document.getElementById('mainCharImgP2');
+      if (p2Img && state.mode === 'p2' && state.p2Char) p2Img.src = `characters/${state.p2Char}/idle_${frame}.png`;
+      
+      document.querySelectorAll('#charRollerStage .roller-card img').forEach(img => {
+        let charName = img.dataset.char;
+        if (charName) img.src = `characters/${charName}/idle_${frame}.png`;
+      });
+    }, 350);
+
+    // Modals
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; updateDashboard(); }
+    
+    function openModeModal() {
+      const track = document.getElementById('modeSwitchTrack');
+      if (state.mode === 'p2') track.classList.add('p2-active');
+      else track.classList.remove('p2-active');
+      openModal('modeModal');
+    }
+    
+    function toggleMode() {
+      const track = document.getElementById('modeSwitchTrack');
+      if (state.mode === 'ai') {
+        state.mode = 'p2'; track.classList.add('p2-active');
+        if (state.p1Char === state.p2Char) {
+          let avail = unlockedChars.filter(c => c !== state.p1Char);
+          state.p2Char = avail.length > 0 ? avail[0] : 'alice';
+        }
+      } else {
+        state.mode = 'ai'; track.classList.remove('p2-active');
+      }
+      updateDashboard();
+    }
+
+    // Roller
+    function openPathModal() {
+      rollerIdx.path = ALL_PATHS.indexOf(state.pathTheme);
+      if (rollerIdx.path === -1) rollerIdx.path = 0;
+      initRoller('path'); openModal('pathModal');
+    }
+    
+    function openCharModal() {
+      document.getElementById('charTabsContainer').style.display = state.mode === 'p2' ? 'flex' : 'none';
+      switchCharTab(1); openModal('charModal');
+    }
+    
+    function switchCharTab(playerNum) {
+      activeCharPlayerTab = playerNum;
+      document.getElementById('tabP1Btn').className = `char-tab-btn ${playerNum === 1 ? 'active-p1' : ''}`;
+      document.getElementById('tabP2Btn').className = `char-tab-btn ${playerNum === 2 ? 'active-p2' : ''}`;
+      let currentChar = playerNum === 1 ? state.p1Char : state.p2Char;
+      rollerIdx.char = DISPLAY_CHARACTERS.indexOf(currentChar);
+      if (rollerIdx.char === -1) rollerIdx.char = 0;
+      initRoller('char');
+    }
+    
+    function initRoller(type) {
+      const isPath = type === 'path', list = isPath ? ALL_PATHS : DISPLAY_CHARACTERS;
+      const stage = document.getElementById(isPath ? 'pathRollerStage' : 'charRollerStage');
+      stage.innerHTML = '';
+      list.forEach((item, idx) => {
+        let card = document.createElement('div'); card.className = 'roller-card'; card.dataset.index = idx;
+        let isUnlocked = isPath ? unlockedPaths.includes(item) : unlockedChars.includes(item);
+        let imgUrl = isPath ? `paths/${item}.png` : `characters/${item}/idle_1.png`;
+        let displayName = isPath ? (PATH_NAMES[item] || item).toUpperCase() : item.replace('_',' ').toUpperCase();
+        
+        card.innerHTML = `<img src="${imgUrl}" data-char="${!isPath ? item : ''}" onerror="this.style.display='none'"><span class="item-name">${displayName}</span>`;
+        if (!isUnlocked) card.innerHTML += SVG_LOCK;
+        
+        card.onclick = () => {
+          if (stage.wasDragging) return;
+          let diff = getRollerDiff(idx, rollerIdx[type], list.length);
+          if (diff !== 0) stepRoller(type, diff);
+          else {
+            if (!isUnlocked) handleLockedClick();
+            else {
+              if (!isPath && state.mode === 'p2') {
+                let isLockedByOther = (activeCharPlayerTab === 1 && state.p2Char === item) || (activeCharPlayerTab === 2 && state.p1Char === item);
+                if (isLockedByOther) return showCustomAlert("DIPAKAI", "Karakter ini telah dipilih lawan.");
+              }
+              closeModal(isPath ? 'pathModal' : 'charModal');
+            }
+          }
+        };
+        stage.appendChild(card);
+      });
+      updateRollerVisuals(type); setupRollerDrag(stage.id, type);
+    }
+    
+    function stepRoller(type, step) {
+      const list = type === 'path' ? ALL_PATHS : DISPLAY_CHARACTERS, len = list.length;
+      rollerIdx[type] = (rollerIdx[type] + step + len) % len;
+      updateRollerVisuals(type);
+    }
+    
+    function getRollerDiff(targetIdx, currentIdx, len) {
+      let diff = (targetIdx - currentIdx) % len;
+      if (diff > Math.floor(len / 2)) diff -= len;
+      if (diff < -Math.floor(len / 2)) diff += len;
+      return diff;
+    }
+    
+    function updateRollerVisuals(type) {
+      const isPath = type === 'path', list = isPath ? ALL_PATHS : DISPLAY_CHARACTERS;
+      const stage = document.getElementById(isPath ? 'pathRollerStage' : 'charRollerStage');
+      const label = document.getElementById(isPath ? 'pathRollerLabel' : 'charRollerLabel');
+      const currentIdx = rollerIdx[type], len = list.length, activeItem = list[currentIdx];
+      let isUnlocked = isPath ? unlockedPaths.includes(activeItem) : unlockedChars.includes(activeItem), isLockedByOther = false;
+
+      if (!isPath && state.mode === 'p2') {
+        if (activeCharPlayerTab === 1 && state.p2Char === activeItem) isLockedByOther = true;
+        if (activeCharPlayerTab === 2 && state.p1Char === activeItem) isLockedByOther = true;
+      }
+      
+      let displayLabel = isPath ? (PATH_NAMES[activeItem] || activeItem).toUpperCase() : activeItem.toUpperCase();
+      label.innerText = displayLabel;
+      
+      if (!isUnlocked || isLockedByOther) {
+        label.innerText += isUnlocked ? " (DIPAKAI)" : " (TERKUNCI)";
+        label.style.color = "var(--red)";
+      } else {
+        label.style.color = "var(--gold)";
+        if (isPath) state.pathTheme = activeItem;
+        else activeCharPlayerTab === 1 ? state.p1Char = activeItem : state.p2Char = activeItem;
+      }
+
+      Array.from(stage.children).forEach((card, idx) => {
+        let diff = getRollerDiff(idx, currentIdx, len), item = list[idx];
+        let cardUnlocked = isPath ? unlockedPaths.includes(item) : unlockedChars.includes(item);
+        let cardLockedByOther = (!isPath && state.mode === 'p2') && ((activeCharPlayerTab === 1 && state.p2Char === item) || (activeCharPlayerTab === 2 && state.p1Char === item));
+        
+        card.style.filter = (!cardUnlocked || cardLockedByOther) ? "grayscale(100%) brightness(0.5)" : (diff === 0 ? "brightness(1.1)" : "brightness(0.7)");
+        
+        if (diff === 0) {
+          card.style.transform = "translate3d(0px, 0px, 40px) scale(1.15)";
+          card.style.opacity = "1"; card.style.zIndex = "10"; card.style.borderColor = "var(--gold)"; card.style.pointerEvents = "auto";
+        } else if (Math.abs(diff) === 1) {
+          card.style.transform = `translate3d(${diff * 95}px, 0px, -20px) scale(0.85)`;
+          card.style.opacity = "0.7"; card.style.zIndex = "5"; card.style.borderColor = "#000"; card.style.pointerEvents = "auto";
+        } else {
+          card.style.transform = `translate3d(${diff > 0 ? 180 : -180}px, 0px, -100px) scale(0.5)`;
+          card.style.opacity = "0"; card.style.zIndex = "1"; card.style.pointerEvents = "none";
+        }
+      });
+    }
+    
+    function setupRollerDrag(stageId, type) {
+      const stage = document.getElementById(stageId);
+      let startX = 0, isDragging = false;
+      stage.wasDragging = false;
+      stage.onpointerdown = (e) => { startX = e.clientX; isDragging = true; stage.wasDragging = false; stage.setPointerCapture(e.pointerId); };
+      stage.onpointermove = (e) => {
+        if (!isDragging) return;
+        let deltaX = e.clientX - startX;
+        if (Math.abs(deltaX) > 10) stage.wasDragging = true;
+        if (Math.abs(deltaX) > 40) { stepRoller(type, deltaX > 0 ? -1 : 1); startX = e.clientX; }
+      };
+      const stopDrag = () => { isDragging = false; };
+      stage.onpointerup = stopDrag; stage.onpointercancel = stopDrag;
+    }
+
+    // Shop
+    function showCustomAlert(title, text, customButtonsHTML = null) {
+      document.getElementById('msgModalTitle').innerText = title;
+      document.getElementById('msgModalText').innerText = text;
+      document.getElementById('msgModalButtons').innerHTML = customButtonsHTML || `<button class="btn btn-blue btn-inline" onclick="closeModal('messageModal')">OK</button>`;
+      openModal('messageModal');
+    }
+    
+    function handleLockedClick() { showCustomAlert("TERKUNCI", "Buka di Toko terlebih dahulu.", `<button class="btn btn-green" onclick="closeModal('messageModal'); openShop();">Ke Toko</button><button class="btn btn-red" onclick="closeModal('messageModal')">Batal</button>`); }
+    
+    function openShop() { document.getElementById('shopCoinDisplay').innerHTML = `${COIN_IMG} COINS: ${totalCoins}`; renderShop(); openModal('shopModal'); }
+    function closeShop() { closeModal('shopModal'); }
+    
+    function buyItem(type, id, price) {
+      if (type === 'item' && itemsInventory[id] >= ITEM_METADATA[id].max) return showCustomAlert("LIMIT", "Stok item penuh!");
+      if (totalCoins < price) return showCustomAlert("GAGAL", "Koin Anda tidak mencukupi!");
+      totalCoins -= price; localStorage.setItem('gfd_coins', totalCoins);
+      if (type === 'char') { unlockedChars.push(id); localStorage.setItem('tether_unlocked_chars', JSON.stringify(unlockedChars)); }
+      else if (type === 'path') { unlockedPaths.push(id); localStorage.setItem('tether_unlocked_paths', JSON.stringify(unlockedPaths)); }
+      else if (type === 'item') { itemsInventory[id]++; localStorage.setItem('tether_' + (id === 'snail_bait' ? 'snail_bait' : id), itemsInventory[id]); }
+      document.getElementById('shopCoinDisplay').innerHTML = `${COIN_IMG} COINS: ${totalCoins}`;
+      renderShop(); updateDashboard();
+    }
+    
+    function renderShop() {
+      const content = document.getElementById('shopContent'); content.innerHTML = '';
+      
+      let charHTML = `<div class="shop-section"><div class="shop-section-title">Karakter</div>`;
+      DISPLAY_CHARACTERS.forEach(char => {
+        if (char === 'bob' || char === 'alice') return;
+        const isUnlocked = unlockedChars.includes(char);
+        charHTML += `<div class="shop-item-row"><div class="shop-item-info"><div class="shop-item-icon"><img src="characters/${char}/idle_1.png"></div><div style="min-width:0;"><div style="font-weight:900; color:var(--gold); text-transform:uppercase; font-size:12px; text-shadow:1px 1px 0 #000;">${char}</div><div style="font-size:10px; color:#ddd;">Bonus: ${CHAR_MULTIS[char]}x</div></div></div>${isUnlocked ? `<button class="btn shop-btn" style="background:#555; border-color:#888;" disabled>DIBELI</button>` : `<button class="btn btn-green shop-btn" onclick="buyItem('char', '${char}', ${CHAR_PRICES[char]})">${COIN_IMG} ${CHAR_PRICES[char]}</button>`}</div>`;
+      });
+      charHTML += `</div>`;
+      
+      let pathHTML = `<div class="shop-section"><div class="shop-section-title">Arena</div>`;
+      for (let i=6; i<=17; i++) {
+        let p = `path_${i.toString().padStart(2, '0')}`;
+        let displayName = (PATH_NAMES[p] || p).toUpperCase();
+        pathHTML += `<div class="shop-item-row"><div class="shop-item-info"><div class="shop-item-icon" style="background-image:url('paths/${p}.png'); background-size:cover; background-position:center;"></div><div style="min-width:0;"><div style="font-weight:900; color:var(--gold); text-transform:uppercase; font-size:12px; text-shadow:1px 1px 0 #000;">${displayName}</div></div></div>${unlockedPaths.includes(p) ? `<button class="btn shop-btn" style="background:#555; border-color:#888;" disabled>DIBELI</button>` : `<button class="btn btn-green shop-btn" onclick="buyItem('path', '${p}', 250)">${COIN_IMG} 250</button>`}</div>`;
+      }
+      pathHTML += `</div>`;
+
+      let itemHTML = `<div class="shop-section"><div class="shop-section-title">Item Bantuan</div>`;
+      const itemPrices = { snail_bait: 200, antidead: 1000, stalestill: 800, glidesteps: 300, incognito: 500 };
+      const itemDescs = { snail_bait: "Siput cepat", antidead: "Nyawa tambahan", stalestill: "Lumpuhkan lawan", glidesteps: "Meluncur", incognito: "Langkah senyap" };
+      Object.keys(ITEM_METADATA).forEach(id => {
+        let count = itemsInventory[id], meta = ITEM_METADATA[id], isFull = count >= meta.max;
+        itemHTML += `<div class="shop-item-row"><div class="shop-item-info"><div class="shop-item-icon" style="background:#000;"><img src="${meta.img}" onerror="this.src='characters/bob/idle_1.png'"></div><div style="min-width:0;"><div style="font-weight:900; color:var(--gold); text-transform:uppercase; font-size:12px; text-shadow:1px 1px 0 #000;">${meta.name}</div><div style="font-size:10px; color:#ddd;">${itemDescs[id]}</div><div style="font-size:11px; color:#4caf50; font-weight:900; text-shadow:1px 1px 0 #000;">Stok: ${count}/${meta.max}</div></div></div>${isFull ? `<button class="btn shop-btn" disabled style="background:#555; border-color:#888;">PENUH</button>` : `<button class="btn btn-green shop-btn" onclick="buyItem('item', '${id}', ${itemPrices[id]})">${COIN_IMG} ${itemPrices[id]}</button>`}</div>`;
+      });
+      content.innerHTML = charHTML + pathHTML + itemHTML;
+    }
+
+    // Start
+    function startGame() {
+      if (state.mode === 'ai' && !state.p1Char) return showCustomAlert('INFO', 'Pilih karakter dahulu!');
+      if (state.mode === 'p2' && (!state.p1Char || !state.p2Char)) return showCustomAlert('INFO', 'Pemain belum lengkap!');
+      let itemsToActive = { snailBaitActive: itemsInventory.snail_bait > 0, antideadActive: itemsInventory.antidead > 0, stalestillActive: itemsInventory.stalestill > 0, glidestepsActive: itemsInventory.glidesteps > 0, incognitoActive: itemsInventory.incognito > 0 };
+      localStorage.setItem('tether_game_config', JSON.stringify({ mode: state.mode, p1Char: state.p1Char, p2Char: state.p2Char, pathTheme: state.pathTheme, ...itemsToActive }));
+      window.location.href = 'gameplay.html';
+    }
+    
+    updateDashboard();
+  </script>
+</body>
+</html>
