@@ -357,15 +357,31 @@
     const ctx = el.dpad.getContext('2d'); 
     ctx.imageSmoothingEnabled = false;
 
+    // --- Inisialisasi Audio dan LocalStorage ---
     const audio = {
       play: document.getElementById('bgmPlay'), click: document.getElementById('sfxClick'),
       win: document.getElementById('sfxWin'), lose: document.getElementById('sfxLose')
     };
 
+    // Ambil data volume dan mute dari localStorage dengan default fallback
+    const bgmVol = localStorage.getItem('tether_bgm_vol') !== null ? parseFloat(localStorage.getItem('tether_bgm_vol')) : 1;
+    const bgmMute = localStorage.getItem('tether_bgm_mute') === 'true';
+    const sfxVol = localStorage.getItem('tether_sfx_vol') !== null ? parseFloat(localStorage.getItem('tether_sfx_vol')) : 1;
+    const sfxMute = localStorage.getItem('tether_sfx_mute') === 'true';
+
+    // Terapkan level volume & kondisi mute
+    audio.play.volume = bgmMute ? 0 : bgmVol;
+    [audio.click, audio.win, audio.lose].forEach(sfx => {
+      sfx.volume = sfxMute ? 0 : sfxVol;
+    });
+
+    // Jalankan BGM langsung tanpa menunggu interaksi (Browser modern akan mengizinkan jika sebelumnya dari main menu)
+    audio.play.play().catch(e => console.warn("Browser menahan autoplay BGM:", e));
+    // -------------------------------------------
+
     document.addEventListener('click', (e) => {
       if (e.target.closest('.btn, .header-btn, .cell, #dpad')) { audio.click.currentTime = 0; audio.click.play().catch(()=>{}); }
     });
-    document.body.addEventListener('click', () => { if (audio.play.paused) audio.play.play().catch(()=>{}); }, { once: true });
 
     let state = { 
       mode: config.mode, size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, 
