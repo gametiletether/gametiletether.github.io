@@ -55,6 +55,9 @@
       display: flex; 
       flex-direction: column; 
       gap: 10px; 
+      max-height: 100%;
+      overflow-y: auto;
+      padding-right: 4px;
     }
     
     .menu-logo {
@@ -152,40 +155,15 @@
     #messageModal .popup-box{ max-width: 360px; }
     #msgModalText{ font-size: 14px; line-height:1.5; color:#fff; font-weight:900; text-align:center; text-shadow:2px 2px 0 #000; }
     
-    /* Style Tambahan untuk Tombol Pilihan Aplikasi */
+    /* Style Tambahan untuk Tombol Pilihan Aplikasi & Settings */
     .app-choice-stack { display: flex; flex-direction: column; gap: 10px; width: 100%; margin: 8px 0; }
     .btn-choice { text-align: left; justify-content: flex-start; padding: 14px; font-size: 13px; }
     
-    /* Style untuk Range Slider Pengaturan Audio */
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      background: transparent;
-      margin: 8px 0;
-    }
-    input[type=range]:focus {
-      outline: none;
-    }
-    input[type=range]::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 8px;
-      cursor: pointer;
-      background: #000;
-      border-radius: 4px;
-      border: 1px solid rgba(255,215,0,.3);
-    }
-    input[type=range]::-webkit-slider-thumb {
-      height: 18px;
-      width: 18px;
-      border-radius: 50%;
-      background: var(--gold);
-      border: 2px solid #000;
-      cursor: pointer;
-      -webkit-appearance: none;
-      margin-top: -6px;
-      box-shadow: 1px 1px 0 rgba(0,0,0,.5);
-    }
-
+    .settings-group { background: rgba(0,0,0,.3); border: 2px solid var(--gold); padding: 12px; display: flex; flex-direction: column; gap: 10px; border-radius: 4px; }
+    .settings-group label { font-size: 13px; font-weight: 900; color: #fff; text-shadow: 1px 1px 0 #000; text-transform: uppercase; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    input[type=range] { width: 100%; accent-color: var(--green); }
+    input[type=checkbox] { accent-color: var(--gold); transform: scale(1.3); cursor: pointer; }
+    
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; border: 1px solid #000; }
@@ -199,7 +177,8 @@
 </head>
 <body>
   <div class="app">
-    <audio id="bgmMenu" src="audio/bgm_menu.mp3" loop></audio>
+    <!-- Tambahan autoplay -->
+    <audio id="bgmMenu" src="audio/bgm_menu.mp3" loop autoplay></audio>
     <audio id="sfxClick" src="audio/click.mp3"></audio>
 
     <main class="menu-shell">
@@ -240,14 +219,6 @@
           </div>
         </button>
 
-        <button class="menu-entry" onclick="openFacebookModal()">
-          <div class="left">
-            <div class="title">Komunitas</div>
-            <div class="desc">Hubungi Dev & User Lain</div>
-          </div>
-          <div class="right">👥</div>
-        </button>
-
         <!-- TOMBOL PENGATURAN -->
         <button class="menu-entry" onclick="openSettingsModal()">
           <div class="left">
@@ -255,6 +226,14 @@
             <div class="desc">Atur suara dan musik</div>
           </div>
           <div class="right">⚙️</div>
+        </button>
+
+        <button class="menu-entry" onclick="openFacebookModal()">
+          <div class="left">
+            <div class="title">Komunitas</div>
+            <div class="desc">Hubungi Dev & User Lain</div>
+          </div>
+          <div class="right">🌐</div>
         </button>
       </section>
     </main>
@@ -271,6 +250,31 @@
       </div>
       <div class="dock-name" id="dockCharName">BOB</div>
     </aside>
+
+    <!-- MODAL PENGATURAN -->
+    <div class="popup-overlay" id="settingsModal">
+      <div class="popup-box">
+        <div class="popup-title">Pengaturan</div>
+        
+        <div class="settings-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; color:var(--gold); font-weight:900; text-shadow: 1px 1px 0 #000; font-size:14px;">
+            <span>Musik (BGM)</span>
+            <label><input type="checkbox" id="bgmMute" onchange="updateAudioSettings()"> Bisu</label>
+          </div>
+          <input type="range" id="bgmVol" min="0" max="1" step="0.05" onchange="updateAudioSettings()" oninput="updateAudioSettings()">
+        </div>
+
+        <div class="settings-group" style="margin-top:4px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; color:var(--gold); font-weight:900; text-shadow: 1px 1px 0 #000; font-size:14px;">
+            <span>Efek Suara (SFX)</span>
+            <label><input type="checkbox" id="sfxMute" onchange="updateAudioSettings()"> Bisu</label>
+          </div>
+          <input type="range" id="sfxVol" min="0" max="1" step="0.05" onchange="updateAudioSettings()" oninput="updateAudioSettings()">
+        </div>
+
+        <button class="btn btn-green btn-inline" style="margin-top:12px;" onclick="closeModal('settingsModal')">Simpan</button>
+      </div>
+    </div>
 
     <!-- MODAL CHOOSE MODE -->
     <div class="popup-overlay" id="modeModal">
@@ -332,43 +336,10 @@
         <div style="font-size: 11px; text-align: center; color: #ddd; text-shadow: 1px 1px 0 #000; margin-bottom: 5px;">PILIH APLIKASI UNTUK MEMBUKA GRUP:</div>
         <div class="app-choice-stack">
           <button class="btn btn-choice" onclick="launchFacebook('ori')">📱 Facebook Ori</button>
-          <button class="btn btn-choice" onclick="launchFacebook('lite')">📄 Facebook Lite</button>
+          <button class="btn btn-choice" onclick="launchFacebook('lite')">⚡ Facebook Lite</button>
           <button class="btn btn-choice" onclick="launchFacebook('browser')">🌐 Browser Perangkat</button>
         </div>
         <button class="btn btn-red btn-inline" onclick="closeModal('facebookModal')">Batal</button>
-      </div>
-    </div>
-
-    <!-- MODAL PENGATURAN AUDIO -->
-    <div class="popup-overlay" id="settingsModal">
-      <div class="popup-box" style="max-width: 340px;">
-        <div class="popup-title">Pengaturan Audio</div>
-        
-        <div style="display:flex; flex-direction:column; gap:16px; margin: 10px 0;">
-          <!-- Toggle BGM -->
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-             <div style="font-weight:900; color:#fff; text-shadow:1px 1px 0 #000; letter-spacing:1px;">MUSIK (BGM)</div>
-             <button id="bgmToggleBtn" class="btn btn-green" style="padding: 6px 12px; font-size: 12px;" onclick="toggleBgm()">NYALA</button>
-          </div>
-          
-          <!-- Volume BGM -->
-          <div>
-             <div style="font-weight:900; color:var(--gold); text-shadow:1px 1px 0 #000; font-size:12px; margin-bottom:2px; display:flex; justify-content:space-between;">
-               <span>VOLUME BGM</span> <span id="bgmVolDisplay">100%</span>
-             </div>
-             <input type="range" id="bgmVolSlider" min="0" max="1" step="0.05" oninput="updateBgmVolume(this.value)">
-          </div>
-          
-          <!-- Volume SFX -->
-          <div>
-             <div style="font-weight:900; color:var(--gold); text-shadow:1px 1px 0 #000; font-size:12px; margin-bottom:2px; display:flex; justify-content:space-between;">
-               <span>VOLUME KLIK (SFX)</span> <span id="sfxVolDisplay">100%</span>
-             </div>
-             <input type="range" id="sfxVolSlider" min="0" max="1" step="0.05" oninput="updateSfxVolume(this.value)">
-          </div>
-        </div>
-
-        <button class="btn btn-blue btn-inline" onclick="closeSettingsModal()">Simpan & Tutup</button>
       </div>
     </div>
 
@@ -432,16 +403,54 @@
     const ALL_PATHS = Array.from({length: 17}, (_, i) => `path_${(i+1).toString().padStart(2, '0')}`);
     const COIN_IMG = `<img src="characters/fifi/jejak.png" class="coin-icon" alt="coin" onerror="this.style.display='none'">`;
     const SVG_LOCK = `<svg class="lock-icon-svg" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`;
+    
+    // Audio Setup
     const audio = { menu: document.getElementById('bgmMenu'), click: document.getElementById('sfxClick') };
+    
+    let audioSettings = {
+      bgmVol: parseFloat(localStorage.getItem('tether_bgm_vol') ?? '1'),
+      bgmMute: localStorage.getItem('tether_bgm_mute') === 'true',
+      sfxVol: parseFloat(localStorage.getItem('tether_sfx_vol') ?? '1'),
+      sfxMute: localStorage.getItem('tether_sfx_mute') === 'true'
+    };
+
+    function applyAudioSettings() {
+      audio.menu.volume = audioSettings.bgmMute ? 0 : audioSettings.bgmVol;
+      audio.click.volume = audioSettings.sfxMute ? 0 : audioSettings.sfxVol;
+      
+      document.getElementById('bgmVol').value = audioSettings.bgmVol;
+      document.getElementById('bgmMute').checked = audioSettings.bgmMute;
+      document.getElementById('sfxVol').value = audioSettings.sfxVol;
+      document.getElementById('sfxMute').checked = audioSettings.sfxMute;
+
+      localStorage.setItem('tether_bgm_vol', audioSettings.bgmVol);
+      localStorage.setItem('tether_bgm_mute', audioSettings.bgmMute);
+      localStorage.setItem('tether_sfx_vol', audioSettings.sfxVol);
+      localStorage.setItem('tether_sfx_mute', audioSettings.sfxMute);
+    }
+
+    function updateAudioSettings() {
+      audioSettings.bgmVol = parseFloat(document.getElementById('bgmVol').value);
+      audioSettings.bgmMute = document.getElementById('bgmMute').checked;
+      audioSettings.sfxVol = parseFloat(document.getElementById('sfxVol').value);
+      audioSettings.sfxMute = document.getElementById('sfxMute').checked;
+      applyAudioSettings();
+    }
+
+    // Eksekusi auto play BGM sesuai setting saat dimuat
+    window.addEventListener('DOMContentLoaded', () => {
+      applyAudioSettings();
+      audio.menu.play().catch(e => console.log("Autoplay BGM tertahan kebijakan browser:", e));
+    });
+
     let state = { mode: 'ai', p1Char: 'bob', p2Char: 'alice', pathTheme: 'path_01' };
     let rollerIdx = { path: 0, char: 0 };
     let activeCharPlayerTab = 1;
 
-    // Events
+    // Events untuk sfx click (Di-update supaya gak bunyi pas geser slider settings)
     document.addEventListener('click', (e) => {
-      if (e.target.closest('.btn, .menu-entry, .roller-card, .mode-switch-track, .char-tab-btn, .character-dock')) {
-        audio.click.currentTime = 0; 
-        audio.click.play().catch(()=>{});
+      if (e.target.closest('.btn, .menu-entry, .roller-card, .mode-switch-track, .char-tab-btn, .character-dock') && !e.target.closest('input[type="range"]')) {
+        audio.click.currentTime = 0; audio.click.play().catch(()=>{});
       }
     });
 
@@ -506,6 +515,10 @@
       if (state.mode === 'p2') track.classList.add('p2-active');
       else track.classList.remove('p2-active');
       openModal('modeModal');
+    }
+
+    function openSettingsModal() {
+      openModal('settingsModal');
     }
     
     function toggleMode() {
@@ -730,81 +743,6 @@
       let itemsToActive = { snailBaitActive: itemsInventory.snail_bait > 0, antideadActive: itemsInventory.antidead > 0, stalestillActive: itemsInventory.stalestill > 0, glidestepsActive: itemsInventory.glidesteps > 0, incognitoActive: itemsInventory.incognito > 0 };
       localStorage.setItem('tether_game_config', JSON.stringify({ mode: state.mode, p1Char: state.p1Char, p2Char: state.p2Char, pathTheme: state.pathTheme, ...itemsToActive }));
       window.location.href = 'gameplay.html';
-    }
-
-    // ==========================================
-    // PENGATURAN AUDIO (BGM & SFX)
-    // ==========================================
-    let audioSettings = JSON.parse(localStorage.getItem('tether_audio_settings')) || { 
-      bgmOn: true, 
-      bgmVol: 1.0, 
-      sfxVol: 1.0 
-    };
-
-    function applyAudioSettings() {
-      audio.menu.volume = audioSettings.bgmOn ? audioSettings.bgmVol : 0;
-      audio.click.volume = audioSettings.sfxVol;
-
-      // Sinkronisasi UI
-      const bgmBtn = document.getElementById('bgmToggleBtn');
-      if (bgmBtn) {
-        bgmBtn.innerText = audioSettings.bgmOn ? "NYALA" : "MATI";
-        bgmBtn.className = audioSettings.bgmOn ? "btn btn-green" : "btn btn-red";
-      }
-      const bgmSlider = document.getElementById('bgmVolSlider');
-      if (bgmSlider) {
-        bgmSlider.value = audioSettings.bgmVol;
-        document.getElementById('bgmVolDisplay').innerText = Math.round(audioSettings.bgmVol * 100) + '%';
-      }
-      const sfxSlider = document.getElementById('sfxVolSlider');
-      if (sfxSlider) {
-        sfxSlider.value = audioSettings.sfxVol;
-        document.getElementById('sfxVolDisplay').innerText = Math.round(audioSettings.sfxVol * 100) + '%';
-      }
-    }
-
-    function openSettingsModal() {
-      applyAudioSettings();
-      openModal('settingsModal');
-    }
-
-    function closeSettingsModal() {
-      closeModal('settingsModal');
-    }
-
-    function toggleBgm() {
-      audioSettings.bgmOn = !audioSettings.bgmOn;
-      if (audioSettings.bgmOn) {
-        audio.menu.play().catch(()=>{});
-      } else {
-        audio.menu.pause();
-      }
-      saveAudioSettings();
-    }
-
-    function updateBgmVolume(val) {
-      audioSettings.bgmVol = parseFloat(val);
-      if (audioSettings.bgmOn) audio.menu.volume = audioSettings.bgmVol;
-      document.getElementById('bgmVolDisplay').innerText = Math.round(audioSettings.bgmVol * 100) + '%';
-      saveAudioSettings();
-    }
-
-    function updateSfxVolume(val) {
-      audioSettings.sfxVol = parseFloat(val);
-      audio.click.volume = audioSettings.sfxVol;
-      document.getElementById('sfxVolDisplay').innerText = Math.round(audioSettings.sfxVol * 100) + '%';
-      saveAudioSettings();
-    }
-
-    function saveAudioSettings() {
-      localStorage.setItem('tether_audio_settings', JSON.stringify(audioSettings));
-      applyAudioSettings();
-    }
-
-    // Eksekusi Autoplay Audio saat pertama kali diload
-    applyAudioSettings();
-    if (audioSettings.bgmOn) {
-      audio.menu.play().catch(e => console.warn("Browser menolak autoplay:", e));
     }
     
     updateDashboard();
