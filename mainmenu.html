@@ -443,7 +443,24 @@
       audio.menu.play().catch(e => console.log("Autoplay BGM tertahan kebijakan browser:", e));
     });
 
+    // Deklarasi State Awal
     let state = { mode: 'ai', p1Char: 'bob', p2Char: 'alice', pathTheme: 'path_01' };
+
+    // --- TAMBAHAN KODE: Memuat konfigurasi permainan terakhir ---
+    const savedConfigStr = localStorage.getItem('tether_game_config');
+    if (savedConfigStr) {
+      try {
+        const savedConfig = JSON.parse(savedConfigStr);
+        state.mode = savedConfig.mode || state.mode;
+        state.p1Char = savedConfig.p1Char || state.p1Char;
+        state.p2Char = savedConfig.p2Char || state.p2Char;
+        state.pathTheme = savedConfig.pathTheme || state.pathTheme;
+      } catch(e) {
+        console.error("Gagal memuat konfigurasi sebelumnya:", e);
+      }
+    }
+    // ------------------------------------------------------------
+
     let rollerIdx = { path: 0, char: 0 };
     let activeCharPlayerTab = 1;
 
