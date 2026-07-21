@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TileTether - Online & Offline Game</title>
+  <title>TileTether - Main Menu</title>
   <style>
     :root {
       --gold: #ffd700; --gold-dark: #d4af37;
@@ -31,7 +31,6 @@
     }
     .view-container { position: absolute; inset: 0; display: flex; flex-direction: column; }
     #menuView { padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) 14px; overflow: hidden; }
-    #gameView { padding: 0; display: none; }
     .coin-display { display: flex; align-items: center; gap: 8px; min-width: 92px; width: max-content; padding: 8px 12px; background: linear-gradient(180deg, var(--gold), var(--gold-dark)); color: var(--brown-dark); border: 3px solid #fff; outline: 3px solid var(--brown-dark); box-shadow: var(--shadow); font-weight: 900; text-shadow: none; }
     .coin-icon { width: 18px; height: 18px; image-rendering: pixelated; object-fit: contain; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.35)); }
     @keyframes floatLogo { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
@@ -83,64 +82,22 @@
     .shop-section { border: 3px solid var(--gold); padding: 10px; background: rgba(0,0,0,.3); margin-bottom: 8px; }
     .shop-section-title { font-weight: 900; font-size: 12px; color: #fff; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid var(--gold); text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 0 #000; text-align: center; background: var(--brown-dark); }
     .shop-item-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px dashed rgba(255,215,0,.3); padding: 8px 0; }
-    .shop-item-row:last-child { border-bottom: none; padding-bottom: 0; }
     .shop-item-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
     .shop-item-icon { width: 36px; height: 36px; background: rgba(0,0,0,.5); border: 2px solid var(--gold); image-rendering: pixelated; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
     .shop-item-icon img { width: 85%; height: 85%; object-fit: contain; }
     .shop-btn { padding: 6px 8px; font-size: 10px; flex-shrink: 0; }
     .btn-inline { width: 100%; }
     .modal-stack { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: auto; padding-right: 4px; margin-bottom: 8px; }
-    #shopModal .popup-box { height: 86vh; max-width: 440px; }
-    #messageModal .popup-box { max-width: 360px; }
     #msgModalText { font-size: 13px; line-height: 1.4; color: #fff; font-weight: 900; text-align: center; text-shadow: 2px 2px 0 #000; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; border: 1px solid #000; }
-    #gameScreen { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 10px; gap: 10px; justify-content: space-between; }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; background: var(--brown); color: white; padding: 6px 12px; border: 4px solid #000; font-size: 13px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.55); height: 50px; flex-shrink: 0; text-shadow: 2px 2px 0 #000; }
-    .header-side { display: flex; align-items: center; gap: 8px; min-width: 100px; }
-    .header-side.right { justify-content: flex-end; }
-    .header-btn { background: var(--brown-dark); border: 3px solid #000; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px; box-shadow: 0 3px 0 rgba(0,0,0,.55); transition: transform 0.1s; width: 32px; height: 32px; outline: none; }
-    .header-btn:hover { transform: translateY(-2px); }
-    .header-btn:active { transform: translateY(2px); box-shadow: none; }
-    .header-btn canvas { pointer-events: none; }
-    .board-container { flex: 1; display: flex; flex-direction: row; gap: min(3vw, 30px); justify-content: center; align-items: center; width: 100%; max-height: calc(100vh - 75px); overflow: hidden; padding: 5px; }
-    @media (max-aspect-ratio: 1/1) { .board-container { flex-direction: column; gap: 10px; } }
-    .board-wrapper { position: relative; width: min(70vh, 56vw); aspect-ratio: 1 / 1; --grid-size: 10; flex-shrink: 0; }
-    @media (max-aspect-ratio: 1/1) { .board-wrapper { width: min(90vw, 48vh); } }
-    .board { display: grid; background-size: cover; background-position: center; image-rendering: pixelated; border: 4px solid #000; width: 100%; aspect-ratio: 1 / 1; box-shadow: 0 6px 0 rgba(0,0,0,.55), 0 10px 24px rgba(0,0,0,.3); }
-    .cell { border: 1px solid rgba(0, 0, 0, 0.4); background: transparent; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; outline: none; z-index: 2; }
-    .cell.valid { box-shadow: inset 0 0 0 4px var(--gold); background: rgba(255, 215, 0, 0.25); }
-    .jejak-img { width: 120%; height: 120%; object-fit: contain; image-rendering: pixelated; opacity: 1; position: absolute; z-index: 2; }
-    .pieces-layer { position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px; pointer-events: none; z-index: 100; }
-    .player-piece { position: absolute; width: calc(100% / var(--grid-size)); height: calc(100% / var(--grid-size)); display: flex; align-items: center; justify-content: center; transform: translate(calc(var(--px) * 100%), calc(var(--py) * 100%)); transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.5, 1); z-index: 50; opacity: 0; }
-    .player-piece.visible { opacity: 1; }
-    .player-piece img { width: 150%; height: 150%; object-fit: contain; image-rendering: pixelated; position: absolute; bottom: 10%; z-index: 10; }
-    .controller-area { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--brown); padding: 12px; border: 4px solid #000; box-shadow: 0 6px 0 rgba(0,0,0,.55); position: relative; }
-    .status-text { display: block; position: absolute; top: -14px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: white; background: var(--brown-dark); padding: 3px 10px; border: 3px solid #000; text-align: center; box-shadow: 0 3px 0 rgba(0,0,0,.55); z-index: 10; white-space: nowrap; pointer-events: none; text-shadow: 2px 2px 0 #000; }
-    @keyframes shake { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 20% { transform: translate(-3px, 1px) rotate(-1deg); } 40% { transform: translate(3px, -2px) rotate(1deg); } 60% { transform: translate(-3px, 2px) rotate(0deg); } 80% { transform: translate(2px, -1px) rotate(1deg); } }
-    .shake-active { animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
-    .popup-earned-coins { font-size: 15px; font-weight: bold; color: var(--gold); margin-bottom: 8px; text-shadow: 2px 2px 0 #000; }
-    .popup-char-display { width: 80px; height: 80px; margin: 8px auto; display: flex; align-items: center; justify-content: center; }
-    .popup-char-display img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
-    .popup-question { font-size: 13px; font-weight: bold; margin: 10px 0; }
-    .popup-buttons { display: flex; justify-content: center; gap: 10px; }
-    .mc-container { background: var(--brown-dark); border: 4px solid #000; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
-    .mc-slots-grid { display: grid; grid-template-columns: repeat(4, 48px); gap: 8px; justify-content: center; }
-    .mc-slot { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background-color: #5c2a0d; border: 3px solid #000; cursor: pointer; position: relative; }
-    .mc-slot:hover { background-color: #8b4513; }
-    .mc-slot img { width: 32px; height: 32px; object-fit: contain; }
-    .mc-count { position: absolute; bottom: 2px; right: 4px; color: #fff; font-size: 11px; font-weight: bold; text-shadow: 2px 2px 0 #000; font-family: monospace; }
-    .mc-label { font-size: 11px; color: var(--gold); font-weight: bold; text-transform: uppercase; margin-bottom: 4px; text-align: center; text-shadow: 2px 2px 0 #000; }
   </style>
 </head>
 <body>
   <audio id="bgmMenu" src="audio/bgm_menu.mp3" loop></audio>
-  <audio id="bgmPlay" src="audio/bgm_play.mp3" loop></audio>
   <audio id="sfxClick" src="audio/click.mp3"></audio>
-  <audio id="sfxWin" src="audio/win.mp3"></audio>
-  <audio id="sfxLose" src="audio/lose.mp3"></audio>
-  <img id="stalestillImg" src="items/stalestill.png" style="display:none;">
+
   <div id="menuView" class="view-container">
     <main class="menu-shell">
       <section class="menu-stack">
@@ -177,6 +134,7 @@
         </div>
       </section>
     </main>
+
     <aside class="character-dock" onclick="openCharModal()">
       <div class="dock-top"><div class="dock-title">Pemain</div></div>
       <div class="dock-avatar" id="dockAvatar">
@@ -184,6 +142,8 @@
       </div>
       <div class="dock-name" id="dockCharName">GUEST</div>
     </aside>
+
+    <!-- Modals -->
     <div class="popup-overlay" id="authModal">
       <div class="popup-box">
         <div class="popup-title" id="authTitle">LOGIN</div>
@@ -212,6 +172,7 @@
         <button class="btn btn-red btn-inline" onclick="closeModal('authModal')">BATAL</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="profileModal">
       <div class="popup-box">
         <div class="popup-title">PROFIL PEMAIN</div>
@@ -241,6 +202,7 @@
         <button class="btn btn-blue btn-inline" onclick="closeModal('profileModal')">TUTUP</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="playersModal">
       <div class="popup-box">
         <div class="popup-title">DAFTAR PEMAIN ONLINE</div>
@@ -248,6 +210,7 @@
         <button class="btn btn-red btn-inline" onclick="closeModal('playersModal')">TUTUP</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="challengeModal">
       <div class="popup-box">
         <div class="popup-title">TANTANG PEMAIN</div>
@@ -260,6 +223,7 @@
         <button class="btn btn-red btn-inline" onclick="closeModal('challengeModal')">BATAL</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="incomingChallengeModal">
       <div class="popup-box">
         <div class="popup-title">TANTANGAN MASUK!</div>
@@ -270,6 +234,7 @@
         </div>
       </div>
     </div>
+
     <div class="popup-overlay" id="pathModal">
       <div class="popup-box">
         <div class="popup-title">Pilih Arena</div>
@@ -280,6 +245,7 @@
         <button class="btn btn-green btn-inline" style="margin-top: 10px;" onclick="closeModal('pathModal')">Pilih</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="charModal">
       <div class="popup-box">
         <div class="popup-title">Pilih Karakter</div>
@@ -290,6 +256,7 @@
         <button class="btn btn-green btn-inline" style="margin-top: 10px;" onclick="closeModal('charModal')">Pilih</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="shopModal">
       <div class="popup-box">
         <div class="popup-title">Toko</div>
@@ -298,6 +265,7 @@
         <button class="btn btn-red btn-inline" onclick="closeShop()">Tutup</button>
       </div>
     </div>
+
     <div class="popup-overlay" id="messageModal">
       <div class="popup-box">
         <div class="popup-title" id="msgModalTitle">Info</div>
@@ -308,84 +276,7 @@
       </div>
     </div>
   </div>
-  <div id="gameView" class="view-container">
-    <div id="gameScreen">
-      <div class="header-bar">
-        <div class="header-side">
-          <button class="header-btn" onclick="exitToMenu()" title="Menu Utama">
-            <canvas id="iconMenu" width="28" height="28"></canvas>
-          </button>
-          <span id="p1ScoreLabel" style="color: var(--gold);">P1</span>
-        </div>
-        <span id="turnInfo" style="font-size: 11px; letter-spacing: 1px;">VS</span>
-        <div class="header-side right">
-          <span id="p2ScoreLabel" style="color: var(--gold);">AI</span>
-          <button class="header-btn" style="background: var(--gold-dark);" onclick="openEquipment()" title="Equip Items">
-            <canvas id="iconItems" width="28" height="28"></canvas>
-          </button>
-          <button class="header-btn" style="background: var(--blue-dark);" onclick="document.getElementById('rulesPopup').style.display = 'flex'" title="Aturan Main">
-            <canvas id="iconRules" width="28" height="28"></canvas>
-          </button>
-        </div>
-      </div>
-      <div class="board-container">
-        <div class="board-wrapper" id="boardWrapper">
-          <div class="board" id="board"></div>
-          <div class="pieces-layer" id="piecesLayer">
-            <div class="player-piece" id="piece0"><img src="" alt="P1"></div>
-            <div class="player-piece" id="piece1"><img src="" alt="P2"></div>
-          </div>
-        </div>
-        <div class="controller-area">
-          <div class="status-text" id="status">P1: PILIH TITIK AWAL</div>
-          <canvas id="dpad" width="250" height="250"></canvas>
-        </div>
-      </div>
-    </div>
-    <div class="popup-overlay" id="equipmentModal">
-      <div class="popup-box" style="max-width: 320px;">
-        <div class="popup-title">ITEMS</div>
-        <div class="mc-container" style="border: none; padding: 0;">
-          <div>
-            <div class="mc-label">Active Slots (Max 3)</div>
-            <div class="mc-slots-grid" style="grid-template-columns: repeat(3, 48px);">
-              <div class="mc-slot" id="eqSlot-0" onclick="unequipItem(0)"></div>
-              <div class="mc-slot" id="eqSlot-1" onclick="unequipItem(1)"></div>
-              <div class="mc-slot" id="eqSlot-2" onclick="unequipItem(2)"></div>
-            </div>
-          </div>
-          <div style="border-top: 3px dashed #000; padding-top: 10px;">
-            <div class="mc-label">Your Inventory</div>
-            <div class="mc-slots-grid" id="mcInventoryGrid"></div>
-          </div>
-        </div>
-        <button class="btn btn-green" onclick="closeEquipment()" style="margin-top:15px; width: 100%;">SELESAI</button>
-      </div>
-    </div>
-    <div class="popup-overlay" id="gameOverPopup">
-      <div class="popup-box">
-        <div class="popup-title" id="popupMsg">YOU SURVIVE</div>
-        <div class="popup-earned-coins" id="popupCoinMsg">+0 COINS</div>
-        <div class="popup-char-display"><img id="popupCharImg" src="" alt="Status"></div>
-        <div class="popup-question">Selesai Bermain?</div>
-        <div class="popup-buttons">
-          <button class="btn btn-green btn-inline" onclick="handlePopupChoice('yeah')">Lanjut</button>
-          <button class="btn btn-red btn-inline" onclick="handlePopupChoice('nope')">Menu</button>
-        </div>
-      </div>
-    </div>
-    <div class="popup-overlay" id="rulesPopup">
-      <div class="popup-box">
-        <div class="popup-title" style="font-size: 16px;">Aturan Main</div>
-        <div class="popup-question" style="text-align: left; font-size: 11px; margin: 8px 0; line-height: 1.4; font-weight: normal; text-shadow: none;">
-          <b>Fase Penempatan:</b> Klik ubin kosong untuk menempatkan karaktermu.<br><br>
-          <b>Fase Bermain:</b> Klik ubin sekitar karakter atau gunakan D-Pad untuk melompat.<br><br>
-          <b>Tujuan:</b> Ubin yang ditinggalkan akan meninggalkan jejak halangan. Pemain yang terkunci dan tidak bisa bergerak adalah yang kalah!
-        </div>
-        <div class="popup-buttons"><button class="btn btn-green" onclick="document.getElementById('rulesPopup').style.display = 'none'" style="width: 100%;">Mengerti</button></div>
-      </div>
-    </div>
-  </div>
+
   <script type="module">
     const firebaseConfig = {
       apiKey: "AIzaSyB-lRvFDWFceXE1lloWeAP732uohRe7iLo",
@@ -402,22 +293,15 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
-      window.fbAuth = auth;
-      window.fbDb = db;
-      window.fbUpdateDoc = updateDoc;
-      window.fbDoc = doc;
-      window.fbDeleteDoc = deleteDoc;
-      window.isFirebaseReady = true;
+      window.fbAuth = auth; window.fbDb = db; window.fbUpdateDoc = updateDoc; window.fbDoc = doc; window.fbDeleteDoc = deleteDoc; window.isFirebaseReady = true;
+
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           window.currentUser = user;
           try {
             await updateDoc(doc(db, "users", user.uid), { isOnline: true });
             onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-              if (docSnap.exists()) {
-                window.userData = docSnap.data();
-                window.syncUserDataToLocal();
-              }
+              if (docSnap.exists()) { window.userData = docSnap.data(); window.syncUserDataToLocal(); }
             });
             listenForChallenges(user.uid);
           } catch(e) { console.warn("Firestore error:", e); }
@@ -431,61 +315,36 @@
           document.getElementById('dockCharName').innerText = "GUEST";
         }
       });
+      
       window.registerUserFB = async (email, password, username, age) => {
         const res = await createUserWithEmailAndPassword(auth, email, password);
-        const initialData = {
-          uid: res.user.uid,
-          username: username,
-          email: email,
-          age: parseInt(age),
-          coins: window.userData.coins || 1000,
-          wins: window.userData.wins || 0,
-          losses: window.userData.losses || 0,
-          items: window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 },
-          isOnline: true,
-          selectedChar: menuState.p1Char,
-          selectedPath: menuState.pathTheme
-        };
+        const initialData = { uid: res.user.uid, username: username, email: email, age: parseInt(age), coins: window.userData.coins || 1000, wins: window.userData.wins || 0, losses: window.userData.losses || 0, items: window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 }, isOnline: true, selectedChar: menuState.p1Char, selectedPath: menuState.pathTheme };
         await setDoc(doc(db, "users", res.user.uid), initialData);
-        window.userData = initialData;
-        window.syncUserDataToLocal();
+        window.userData = initialData; window.syncUserDataToLocal();
       };
-      window.loginUserFB = async (email, password) => {
-        await signInWithEmailAndPassword(auth, email, password);
-      };
+      
+      window.loginUserFB = async (email, password) => { await signInWithEmailAndPassword(auth, email, password); };
+      
       window.logoutUserFB = async () => {
-        if(window.currentUser) {
-          try { await updateDoc(doc(db, "users", window.currentUser.uid), { isOnline: false }); } catch(e){}
-        }
+        if(window.currentUser) { try { await updateDoc(doc(db, "users", window.currentUser.uid), { isOnline: false }); } catch(e){} }
         await signOut(auth);
       };
+      
       window.saveUserDataToCloud = async () => {
         if (!window.currentUser || !window.userData || !window.isFirebaseReady) return;
         try {
-          await updateDoc(doc(db, "users", window.currentUser.uid), {
-            coins: window.userData.coins || 0,
-            wins: window.userData.wins || 0,
-            losses: window.userData.losses || 0,
-            items: window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 },
-            username: window.userData.username,
-            age: window.userData.age,
-            selectedChar: menuState.p1Char,
-            selectedPath: menuState.pathTheme
-          });
+          await updateDoc(doc(db, "users", window.currentUser.uid), { coins: window.userData.coins || 0, wins: window.userData.wins || 0, losses: window.userData.losses || 0, items: window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 }, username: window.userData.username, age: window.userData.age, selectedChar: menuState.p1Char, selectedPath: menuState.pathTheme });
         } catch(e) { console.warn("Cloud save error:", e); }
       };
+
       window.loadAllPlayersCloud = async () => {
         if(!window.isFirebaseReady) return [];
         const q = query(collection(db, "users"), where("isOnline", "==", true));
-        const querySnapshot = await getDocs(q);
-        let players = [];
-        querySnapshot.forEach((docSnap) => {
-          if(!window.currentUser || docSnap.id !== window.currentUser.uid) {
-            players.push(docSnap.data());
-          }
-        });
+        const querySnapshot = await getDocs(q); let players = [];
+        querySnapshot.forEach((docSnap) => { if(!window.currentUser || docSnap.id !== window.currentUser.uid) players.push(docSnap.data()); });
         return players;
       };
+
       let matchUnsubscribe = null;
       function listenForChallenges(uid) {
         if (matchUnsubscribe) matchUnsubscribe();
@@ -494,54 +353,29 @@
           snapshot.docChanges().forEach((change) => {
             if (change.type === "added") {
               const matchData = change.doc.data();
-              window.activeChallengeDocId = change.doc.id;
-              window.activeChallengeData = matchData;
-              document.getElementById('incomingChallengeText').innerText = 
-                `${matchData.challengerName} menantang Anda bertarung dengan taruhan ${matchData.betCoin} Koin!`;
+              window.activeChallengeDocId = change.doc.id; window.activeChallengeData = matchData;
+              document.getElementById('incomingChallengeText').innerText = `${matchData.challengerName} menantang Anda bertarung dengan taruhan ${matchData.betCoin} Koin!`;
               openModal('incomingChallengeModal');
             }
           });
         });
       }
+
       window.createChallengeCloud = async (targetUid, targetName, targetChar, betCoin) => {
         const matchRef = doc(collection(db, "matches"));
-        const matchData = {
-          matchId: matchRef.id,
-          challengerUid: window.currentUser.uid,
-          challengerName: window.userData.username,
-          challengerChar: window.userData.selectedChar || menuState.p1Char,
-          targetUid: targetUid,
-          targetName: targetName,
-          targetChar: targetChar,
-          betCoin: parseInt(betCoin),
-          status: "pending",
-          gameState: null,
-          currentTurnUid: window.currentUser.uid
-        };
-        await setDoc(matchRef, matchData);
-        return matchRef.id;
+        const matchData = { matchId: matchRef.id, challengerUid: window.currentUser.uid, challengerName: window.userData.username, challengerChar: window.userData.selectedChar || menuState.p1Char, targetUid: targetUid, targetName: targetName, targetChar: targetChar, betCoin: parseInt(betCoin), status: "pending", gameState: null, currentTurnUid: window.currentUser.uid };
+        await setDoc(matchRef, matchData); return matchRef.id;
       };
+
       window.respondChallengeCloud = async (matchId, accept) => {
         const matchRef = doc(db, "matches", matchId);
         await updateDoc(matchRef, { status: accept ? "active" : "rejected" });
       };
+
       window.listenOnlineMatchState = (matchId, onUpdate) => {
-        return onSnapshot(doc(db, "matches", matchId), (docSnap) => {
-          if (docSnap.exists()) onUpdate(docSnap.data());
-        });
+        return onSnapshot(doc(db, "matches", matchId), (docSnap) => { if (docSnap.exists()) onUpdate(docSnap.data()); });
       };
-      window.updateOnlineGameStateCloud = async (matchId, newGameState, nextTurnUid) => {
-        await updateDoc(doc(db, "matches", matchId), {
-          gameState: newGameState,
-          currentTurnUid: nextTurnUid
-        });
-      };
-      window.finishOnlineMatchCloud = async (matchId, winnerUid) => {
-        await updateDoc(doc(db, "matches", matchId), {
-          status: "finished",
-          winnerUid: winnerUid
-        });
-      };
+
       document.addEventListener('visibilitychange', () => {
         if (window.currentUser && window.isFirebaseReady) {
           try { window.fbUpdateDoc(window.fbDoc(window.fbDb, "users", window.currentUser.uid), { isOnline: document.visibilityState === 'visible' }); } catch(e){}
@@ -552,71 +386,50 @@
           try { window.fbUpdateDoc(window.fbDoc(window.fbDb, "users", window.currentUser.uid), { isOnline: false }); } catch(e){}
         }
       });
-    } catch(err) {
-      console.warn("Firebase Init Offline Fallback Active:", err);
-      window.isFirebaseReady = false;
-    }
+    } catch(err) { console.warn("Firebase Init Offline Fallback Active:", err); window.isFirebaseReady = false; }
   </script>
   <script>
-    const PATH_NAMES = {
-      path_01: 'Default', path_02: 'Grass', path_03: 'Water', path_04: 'Abyss', 
-      path_05: 'Swamp', path_06: 'Winter', path_07: 'Trail', path_08: 'Clockwork', 
-      path_09: 'Blossom', path_10: 'Barren', path_11: 'Dungeon', path_12: 'Arcane', 
-      path_13: 'Palace', path_14: 'Void', path_15: 'Fungal', path_16: 'Ruins', path_17: 'Cyber'
-    };
-    const ITEM_METADATA = {
-      antidead: { name: "Antidead", img: "items/antidead.png", max: 3 },
-      stalestill: { name: "Stalestill", img: "items/stalestill.png", max: 5 },
-      glidesteps: { name: "Glidesteps", img: "items/glidesteps.png", max: 10 }
-    };
+    const PATH_NAMES = { path_01: 'Default', path_02: 'Grass', path_03: 'Water', path_04: 'Abyss', path_05: 'Swamp', path_06: 'Winter', path_07: 'Trail', path_08: 'Clockwork', path_09: 'Blossom', path_10: 'Barren', path_11: 'Dungeon', path_12: 'Arcane', path_13: 'Palace', path_14: 'Void', path_15: 'Fungal', path_16: 'Ruins', path_17: 'Cyber' };
+    const ITEM_METADATA = { antidead: { name: "Antidead", img: "items/antidead.png", max: 3 }, stalestill: { name: "Stalestill", img: "items/stalestill.png", max: 5 }, glidesteps: { name: "Glidesteps", img: "items/glidesteps.png", max: 10 } };
     const DISPLAY_CHARACTERS = ['bob', 'alice', 'dany', 'choco', 'greg', 'eva', 'fifi', 'ipul', 'jessy'];
     const ALL_PATHS = Array.from({length: 17}, (_, i) => `path_${(i+1).toString().padStart(2, '0')}`);
     const COIN_IMG = `<img src="characters/fifi/jejak.png" class="coin-icon" alt="coin" onerror="this.style.display='none'">`;
     const ANIM_FRAMES = [1, 2, 3, 2]; 
-    const DIRS = [ { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }, { dx: -1, dy: 1 }, { dx: 0, dy: 1 }, { dx: 1, dy: 1 } ];
+
     let menuState = { p1Char: 'bob', pathTheme: 'path_01' };
     let rollerIdx = { path: 0, char: 0 };
     let authMode = 'login';
     let currentChallengeTarget = null;
-    let isOnlinePVP = false;
-    let activeMatchId = null;
-    let matchListenerUnsub = null;
+    
     function loadLocalSave() {
       const saved = localStorage.getItem('tiletether_local_data');
-      if (saved) {
-        try { return JSON.parse(saved); } catch(e) {}
-      }
+      if (saved) { try { return JSON.parse(saved); } catch(e) {} }
       return { username: 'GUEST', coins: 1000, wins: 0, losses: 0, items: { antidead: 0, stalestill: 0, glidesteps: 0 } };
     }
-    function saveLocalData() {
-      if (window.userData) {
-        localStorage.setItem('tiletether_local_data', JSON.stringify(window.userData));
-      }
-    }
+    function saveLocalData() { if (window.userData) localStorage.setItem('tiletether_local_data', JSON.stringify(window.userData)); }
+    
     window.userData = loadLocalSave();
     let totalCoins = window.userData.coins || 0;
     let itemsInventory = window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 };
-    const unifiedAudio = {
-      menu: document.getElementById('bgmMenu'),
-      play: document.getElementById('bgmPlay'),
-      click: document.getElementById('sfxClick'),
-      win: document.getElementById('sfxWin'),
-      lose: document.getElementById('sfxLose')
-    };
+
+    const bgm = document.getElementById('bgmMenu');
+    const sfxClick = document.getElementById('sfxClick');
     document.addEventListener('click', (e) => {
       if (e.target.closest('.btn, .menu-entry, .roller-card, .character-dock, .header-btn, .cell, #dpad')) {
-        unifiedAudio.click.currentTime = 0; unifiedAudio.click.play().catch(()=>{});
+        sfxClick.currentTime = 0; sfxClick.play().catch(()=>{});
+        bgm.play().catch(()=>{});
       }
     });
+
     window.syncUserDataToLocal = function() {
       if (!window.userData) return;
       totalCoins = window.userData.coins || 0;
       itemsInventory = window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 };
       if (window.userData.selectedChar) menuState.p1Char = window.userData.selectedChar;
       if (window.userData.selectedPath) menuState.pathTheme = window.userData.selectedPath;
-      saveLocalData();
-      updateDashboard();
+      saveLocalData(); updateDashboard();
     };
+
     function updateDashboard() {
       const pathDisplayName = PATH_NAMES[menuState.pathTheme] || menuState.pathTheme;
       document.getElementById('dashPathText').innerText = pathDisplayName.toUpperCase();
@@ -628,9 +441,9 @@
       if (dockName && window.userData) dockName.innerText = (window.userData.username || 'GUEST').toUpperCase();
       document.documentElement.style.setProperty('--bg-img', `url('paths/${menuState.pathTheme}.png')`);
     }
+
     let currentIdleStep = 0;
     setInterval(() => {
-      if(document.getElementById('gameView').style.display !== 'none') return;
       currentIdleStep = (currentIdleStep + 1) % ANIM_FRAMES.length;
       let frame = ANIM_FRAMES[currentIdleStep];
       let mainImg = document.getElementById('mainCharImg');
@@ -639,13 +452,12 @@
         let charName = img.dataset.char; if (charName) img.src = `characters/${charName}/idle_${frame}.png`;
       });
     }, 350);
+
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; updateDashboard(); }
+    
     function openAuthModal(mode) {
-      if (!window.isFirebaseReady) {
-        showCustomAlert("OFFLINE", "Koneksi Firebase belum siap!");
-        return;
-      }
+      if (!window.isFirebaseReady) return showCustomAlert("OFFLINE", "Koneksi Firebase belum siap!");
       authMode = mode;
       document.getElementById('authForm').reset();
       document.getElementById('authTitle').innerText = mode === 'login' ? 'LOGIN AKUN' : 'DAFTAR AKUN BARU';
@@ -655,39 +467,26 @@
       document.getElementById('toggleAuthModeBtn').innerText = mode === 'login' ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login di sini';
       openModal('authModal');
     }
-    function toggleAuthMode() {
-      openAuthModal(authMode === 'login' ? 'register' : 'login');
-    }
+    function toggleAuthMode() { openAuthModal(authMode === 'login' ? 'register' : 'login'); }
+    
     async function handleAuthSubmit(e) {
       e.preventDefault();
-      const email = document.getElementById('authEmail').value;
-      const password = document.getElementById('authPassword').value;
-      const username = document.getElementById('authUsername').value;
-      const age = parseInt(document.getElementById('authAge').value);
+      const email = document.getElementById('authEmail').value, password = document.getElementById('authPassword').value;
+      const username = document.getElementById('authUsername').value, age = parseInt(document.getElementById('authAge').value);
       const btn = document.getElementById('authSubmitBtn');
       if (authMode === 'register') {
         if (!username || username.trim() === "") return showCustomAlert("ERROR", "Username wajib diisi!");
         if (isNaN(age) || age < 10 || age > 79) return showCustomAlert("ERROR", "Umur harus antara 10 hingga 79 tahun!");
       }
-      const originalText = btn.innerText;
-      btn.innerText = "MEMPROSES...";
-      btn.disabled = true;
+      const originalText = btn.innerText; btn.innerText = "MEMPROSES..."; btn.disabled = true;
       try {
-        if (authMode === 'register') {
-          await window.registerUserFB(email, password, username, age);
-          showCustomAlert("BERHASIL", "Pendaftaran akun berhasil dan otomatis login!");
-        } else {
-          await window.loginUserFB(email, password);
-          showCustomAlert("BERHASIL", "Login berhasil!");
-        }
+        if (authMode === 'register') { await window.registerUserFB(email, password, username, age); showCustomAlert("BERHASIL", "Pendaftaran akun berhasil dan otomatis login!"); } 
+        else { await window.loginUserFB(email, password); showCustomAlert("BERHASIL", "Login berhasil!"); }
         closeModal('authModal');
-      } catch (err) {
-        showCustomAlert("GAGAL", err.message);
-      } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }
+      } catch (err) { showCustomAlert("GAGAL", err.message); } 
+      finally { btn.innerText = originalText; btn.disabled = false; }
     }
+
     function openProfileModal() {
       if(!window.userData) return;
       document.getElementById('profUsername').value = window.userData.username || '';
@@ -696,103 +495,73 @@
       document.getElementById('profCoins').innerText = window.userData.coins || 0;
       document.getElementById('profWins').innerText = window.userData.wins || 0;
       document.getElementById('profLosses').innerText = window.userData.losses || 0;
-      let totItems = 0;
-      if (window.userData.items) {
-        Object.values(window.userData.items).forEach(v => totItems += v);
-      }
+      let totItems = 0; if (window.userData.items) Object.values(window.userData.items).forEach(v => totItems += v);
       document.getElementById('profItems').innerText = totItems;
       openModal('profileModal');
     }
+    
     async function saveProfileChanges() {
-      const newUsername = document.getElementById('profUsername').value;
-      const newAge = parseInt(document.getElementById('profAge').value);
+      const newUsername = document.getElementById('profUsername').value, newAge = parseInt(document.getElementById('profAge').value);
       if (!newUsername || newUsername.trim() === "") return showCustomAlert("ERROR", "Username tidak boleh kosong!");
       if (isNaN(newAge) || newAge < 10 || newAge > 79) return showCustomAlert("ERROR", "Umur harus 10-79 tahun!");
-      window.userData.username = newUsername;
-      window.userData.age = newAge;
+      window.userData.username = newUsername; window.userData.age = newAge;
       saveLocalData();
       if (window.saveUserDataToCloud) await window.saveUserDataToCloud();
-      showCustomAlert("SUKSES", "Profil berhasil diperbarui!");
-      closeModal('profileModal');
-      updateDashboard();
+      showCustomAlert("SUKSES", "Profil berhasil diperbarui!"); closeModal('profileModal'); updateDashboard();
     }
+    
     async function logoutUser() {
       if(window.logoutUserFB) await window.logoutUserFB();
       window.userData = { username: 'GUEST', coins: 0, wins: 0, losses: 0, items: { antidead: 0, stalestill: 0, glidesteps: 0 } };
-      closeModal('profileModal');
-      updateDashboard();
-      exitToMenu();
+      closeModal('profileModal'); updateDashboard();
     }
+
     async function openPlayersModal() {
-      if (!window.isFirebaseReady || !window.currentUser) {
-        showCustomAlert("LOGIN DIPERLUKAN", "Silakan Login terlebih dahulu untuk bermain dan menantang pemain lain!", 
-          `<button class="btn btn-green btn-inline" onclick="closeModal('messageModal'); openAuthModal('login');">LOGIN</button>
-           <button class="btn btn-red btn-inline" onclick="closeModal('messageModal')">BATAL</button>`
-        );
-        return;
-      }
+      if (!window.isFirebaseReady || !window.currentUser) return showCustomAlert("LOGIN DIPERLUKAN", "Silakan Login terlebih dahulu untuk bermain dan menantang pemain lain!", `<button class="btn btn-green btn-inline" onclick="closeModal('messageModal'); openAuthModal('login');">LOGIN</button><button class="btn btn-red btn-inline" onclick="closeModal('messageModal')">BATAL</button>`);
       openModal('playersModal');
-      const container = document.getElementById('playersListContainer');
-      container.innerHTML = '<div style="text-align:center; color:#fff;">Memuat daftar pemain...</div>';
-      const players = await window.loadAllPlayersCloud();
-      container.innerHTML = '';
-      if (players.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#fff;">Belum ada pemain lain online.</div>';
-        return;
-      }
+      const container = document.getElementById('playersListContainer'); container.innerHTML = '<div style="text-align:center; color:#fff;">Memuat daftar pemain...</div>';
+      const players = await window.loadAllPlayersCloud(); container.innerHTML = '';
+      if (players.length === 0) return container.innerHTML = '<div style="text-align:center; color:#fff;">Belum ada pemain lain online.</div>';
       players.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'player-card';
-        const safeName = document.createElement('div');
-        safeName.innerText = p.username || 'PLAYER';
-        const escapedUsername = safeName.innerHTML.toUpperCase();
-        card.innerHTML = `
-          <div class="player-info">
-            <div class="player-name">${escapedUsername} <span class="status-badge ${p.isOnline ? 'status-online' : 'status-offline'}"></span></div>
-            <div class="player-stats">🪙 ${p.coins || 0} | 🏆 ${p.wins || 0}W ${p.losses || 0}L</div>
-          </div>
-          ${p.isOnline ? `<button class="btn btn-green shop-btn" onclick="openChallengeModal('${p.uid}', '${(p.username || '').replace(/'/g, "\\'")}', '${p.selectedChar || 'bob'}')">TANTANG</button>` : `<button class="btn shop-btn" disabled style="background:#555;">OFFLINE</button>`}
-        `;
+        const card = document.createElement('div'); card.className = 'player-card';
+        const safeName = document.createElement('div'); safeName.innerText = p.username || 'PLAYER';
+        card.innerHTML = `<div class="player-info"><div class="player-name">${safeName.innerHTML.toUpperCase()} <span class="status-badge ${p.isOnline ? 'status-online' : 'status-offline'}"></span></div><div class="player-stats">🪙 ${p.coins || 0} | 🏆 ${p.wins || 0}W ${p.losses || 0}L</div></div>${p.isOnline ? `<button class="btn btn-green shop-btn" onclick="openChallengeModal('${p.uid}', '${(p.username || '').replace(/'/g, "\\'")}', '${p.selectedChar || 'bob'}')">TANTANG</button>` : `<button class="btn shop-btn" disabled style="background:#555;">OFFLINE</button>`}`;
         container.appendChild(card);
       });
     }
+
     function openChallengeModal(uid, username, charName) {
       currentChallengeTarget = { uid, username, charName };
       document.getElementById('challengeTargetText').innerText = `Menantang: ${username.toUpperCase()}`;
       document.getElementById('challengeBetAmount').max = totalCoins;
       openModal('challengeModal');
     }
+    
     async function sendChallenge() {
       const bet = parseInt(document.getElementById('challengeBetAmount').value);
       if (isNaN(bet) || bet < 100) return showCustomAlert("ERROR", "Minimal taruhan adalah 100 koin!");
       if (bet > totalCoins) return showCustomAlert("ERROR", "Koin kamu tidak mencukupi taruhan ini!");
       try {
         const mId = await window.createChallengeCloud(currentChallengeTarget.uid, currentChallengeTarget.username, currentChallengeTarget.charName, bet);
-        closeModal('challengeModal');
-        closeModal('playersModal');
+        closeModal('challengeModal'); closeModal('playersModal');
         showCustomAlert("MENUNGGU", "Tantangan telah dikirim! Menunggu konfirmasi dari lawan...");
         const unsub = window.listenOnlineMatchState(mId, (matchData) => {
           if (matchData.status === "active") {
-            unsub();
-            closeModal('messageModal');
-            startOnlinePVPGame(mId, matchData, true);
+            unsub(); closeModal('messageModal'); startOnlinePVPGame(mId, matchData, true);
           } else if (matchData.status === "rejected") {
-            unsub();
-            showCustomAlert("DITOLAK", "Lawan menolak tantangan bermain.");
+            unsub(); showCustomAlert("DITOLAK", "Lawan menolak tantangan bermain.");
           }
         });
-      } catch(err) {
-        showCustomAlert("ERROR", err.message);
-      }
+      } catch(err) { showCustomAlert("ERROR", err.message); }
     }
+    
     async function respondChallenge(accept) {
       if (!window.activeChallengeDocId) return;
       closeModal('incomingChallengeModal');
       await window.respondChallengeCloud(window.activeChallengeDocId, accept);
-      if (accept) {
-        startOnlinePVPGame(window.activeChallengeDocId, window.activeChallengeData, false);
-      }
+      if (accept) startOnlinePVPGame(window.activeChallengeDocId, window.activeChallengeData, false);
     }
+
     function openPathModal() { rollerIdx.path = ALL_PATHS.indexOf(menuState.pathTheme); if (rollerIdx.path === -1) rollerIdx.path = 0; initRoller('path'); openModal('pathModal'); }
     function openCharModal() { rollerIdx.char = DISPLAY_CHARACTERS.indexOf(menuState.p1Char); if (rollerIdx.char === -1) rollerIdx.char = 0; initRoller('char'); openModal('charModal'); }
     function initRoller(type) {
@@ -804,12 +573,7 @@
         let imgUrl = isPath ? `paths/${item}.png` : `characters/${item}/idle_1.png`;
         let displayName = isPath ? (PATH_NAMES[item] || item).toUpperCase() : item.replace('_',' ').toUpperCase();
         card.innerHTML = `<img src="${imgUrl}" data-char="${!isPath ? item : ''}" onerror="this.style.display='none'"><span class="item-name">${displayName}</span>`;
-        card.onclick = () => {
-          if (stage.wasDragging) return;
-          let diff = getRollerDiff(idx, rollerIdx[type], list.length);
-          if (diff !== 0) stepRoller(type, diff);
-          else closeModal(isPath ? 'pathModal' : 'charModal');
-        };
+        card.onclick = () => { if (stage.wasDragging) return; let diff = getRollerDiff(idx, rollerIdx[type], list.length); if (diff !== 0) stepRoller(type, diff); else closeModal(isPath ? 'pathModal' : 'charModal'); };
         stage.appendChild(card);
       });
       updateRollerVisuals(type); setupRollerDrag(stage.id, type);
@@ -818,18 +582,13 @@
     function getRollerDiff(targetIdx, currentIdx, len) { let diff = (targetIdx - currentIdx) % len; if (diff > Math.floor(len / 2)) diff -= len; if (diff < -Math.floor(len / 2)) diff += len; return diff; }
     function updateRollerVisuals(type) {
       const isPath = type === 'path', list = isPath ? ALL_PATHS : DISPLAY_CHARACTERS;
-      const stage = document.getElementById(isPath ? 'pathRollerStage' : 'charRollerStage');
-      const label = document.getElementById(isPath ? 'pathRollerLabel' : 'charRollerLabel');
+      const stage = document.getElementById(isPath ? 'pathRollerStage' : 'charRollerStage'), label = document.getElementById(isPath ? 'pathRollerLabel' : 'charRollerLabel');
       const currentIdx = rollerIdx[type], len = list.length, activeItem = list[currentIdx];
-      let displayLabel = isPath ? (PATH_NAMES[activeItem] || activeItem).toUpperCase() : activeItem.toUpperCase();
-      label.innerText = displayLabel;
-      label.style.color = "var(--gold)"; 
+      label.innerText = isPath ? (PATH_NAMES[activeItem] || activeItem).toUpperCase() : activeItem.toUpperCase();
       if (isPath) menuState.pathTheme = activeItem; else menuState.p1Char = activeItem;
-      saveLocalData();
-      if (window.saveUserDataToCloud) window.saveUserDataToCloud();
+      saveLocalData(); if (window.saveUserDataToCloud) window.saveUserDataToCloud();
       Array.from(stage.children).forEach((card, idx) => {
-        let diff = getRollerDiff(idx, currentIdx, len);
-        card.style.filter = diff === 0 ? "brightness(1.1)" : "brightness(0.7)";
+        let diff = getRollerDiff(idx, currentIdx, len); card.style.filter = diff === 0 ? "brightness(1.1)" : "brightness(0.7)";
         if (diff === 0) { card.style.transform = "translate3d(0px, 0px, 40px) scale(1.15)"; card.style.opacity = "1"; card.style.zIndex = "10"; card.style.borderColor = "var(--gold)"; card.style.pointerEvents = "auto"; } 
         else if (Math.abs(diff) === 1) { card.style.transform = `translate3d(${diff * 95}px, 0px, -20px) scale(0.85)`; card.style.opacity = "0.7"; card.style.zIndex = "5"; card.style.borderColor = "#000"; card.style.pointerEvents = "auto"; } 
         else { card.style.transform = `translate3d(${diff > 0 ? 180 : -180}px, 0px, -100px) scale(0.5)`; card.style.opacity = "0"; card.style.zIndex = "1"; card.style.pointerEvents = "none"; }
@@ -841,496 +600,48 @@
       stage.onpointermove = (e) => { if (!isDragging) return; let deltaX = e.clientX - startX; if (Math.abs(deltaX) > 10) stage.wasDragging = true; if (Math.abs(deltaX) > 40) { stepRoller(type, deltaX > 0 ? -1 : 1); startX = e.clientX; } };
       const stopDrag = () => { isDragging = false; }; stage.onpointerup = stopDrag; stage.onpointercancel = stopDrag;
     }
+
     function showCustomAlert(title, text, customButtonsHTML = null) {
       document.getElementById('msgModalTitle').innerText = title; document.getElementById('msgModalText').innerText = text;
-      document.getElementById('msgModalButtons').innerHTML = customButtonsHTML || `<button class="btn btn-blue btn-inline" onclick="closeModal('messageModal')">OK</button>`;
-      openModal('messageModal');
+      document.getElementById('msgModalButtons').innerHTML = customButtonsHTML || `<button class="btn btn-blue btn-inline" onclick="closeModal('messageModal')">OK</button>`; openModal('messageModal');
     }
+
     function openShop() { document.getElementById('shopCoinDisplay').innerHTML = `${COIN_IMG} COINS: ${totalCoins}`; renderShop(); openModal('shopModal'); }
     function closeShop() { closeModal('shopModal'); }
     async function buyItem(id, price) {
       if (itemsInventory[id] >= ITEM_METADATA[id].max) return showCustomAlert("LIMIT", "Stok item penuh!");
       if (totalCoins < price) return showCustomAlert("GAGAL", "Koin Anda tidak mencukupi!");
-      totalCoins -= price; 
-      itemsInventory[id]++; 
-      window.userData.coins = totalCoins;
-      window.userData.items = itemsInventory;
-      saveLocalData();
+      totalCoins -= price; itemsInventory[id]++; 
+      window.userData.coins = totalCoins; window.userData.items = itemsInventory; saveLocalData();
       if (window.saveUserDataToCloud) await window.saveUserDataToCloud();
-      document.getElementById('shopCoinDisplay').innerHTML = `${COIN_IMG} COINS: ${totalCoins}`;
-      renderShop(); updateDashboard();
+      document.getElementById('shopCoinDisplay').innerHTML = `${COIN_IMG} COINS: ${totalCoins}`; renderShop(); updateDashboard();
     }
     function renderShop() {
       const content = document.getElementById('shopContent'); content.innerHTML = '';
       let itemHTML = `<div class="shop-section"><div class="shop-section-title">Item Bantuan</div>`;
-      const itemPrices = { antidead: 1000, stalestill: 800, glidesteps: 300 };
-      const itemDescs = { antidead: "Untuk bangkit dari kematian", stalestill: "Untuk Diam di tempat", glidesteps: "Meluncur lurus jauh" };
+      const itemPrices = { antidead: 1000, stalestill: 800, glidesteps: 300 }, itemDescs = { antidead: "Untuk bangkit dari kematian", stalestill: "Untuk Diam di tempat", glidesteps: "Meluncur lurus jauh" };
       Object.keys(ITEM_METADATA).forEach(id => {
         let count = itemsInventory[id] || 0, meta = ITEM_METADATA[id], isFull = count >= meta.max;
         itemHTML += `<div class="shop-item-row"><div class="shop-item-info"><div class="shop-item-icon" style="background:#000;"><img src="${meta.img}" onerror="this.src='characters/bob/idle_1.png'"></div><div style="min-width:0;"><div style="font-weight:900; color:var(--gold); text-transform:uppercase; font-size:11px; text-shadow:1px 1px 0 #000;">${meta.name}</div><div style="font-size:9px; color:#ddd;">${itemDescs[id]}</div><div style="font-size:10px; color:#4caf50; font-weight:900; text-shadow:1px 1px 0 #000;">Stok: ${count}/${meta.max}</div></div></div>${isFull ? `<button class="btn shop-btn" disabled style="background:#555; border-color:#888;">PENUH</button>` : `<button class="btn btn-green shop-btn" onclick="buyItem('${id}', ${itemPrices[id]})">${COIN_IMG} ${itemPrices[id]}</button>`}</div>`;
       });
-      itemHTML += `</div>`; content.innerHTML = itemHTML;
+      content.innerHTML = itemHTML + `</div>`;
     }
+
     function launchCommunity() {
       const groupId = "1070738102191282", webUrl = "https://www.facebook.com/groups/" + groupId + "/";
-      window.location.href = "fb://group/" + groupId;
-      setTimeout(function() { window.open(webUrl, '_blank'); }, 1000);
+      window.location.href = "fb://group/" + groupId; setTimeout(function() { window.open(webUrl, '_blank'); }, 1000);
     }
+
     function startSinglePlayerGame() {
-      if (!window.currentUser && window.isFirebaseReady) {
-        showCustomAlert("LOGIN DIPERLUKAN", "Silakan login terlebih dahulu untuk bermain.",
-          `<button class="btn btn-green btn-inline" onclick="closeModal('messageModal'); openAuthModal('login');">LOGIN</button>
-           <button class="btn btn-red btn-inline" onclick="closeModal('messageModal')">BATAL</button>`
-        );
-        return;
-      }
-      isOnlinePVP = false;
-      if (!menuState.p1Char) menuState.p1Char = 'bob';
-      let itemsToActive = { antideadActive: itemsInventory.antidead > 0, stalestillActive: itemsInventory.stalestill > 0, glidestepsActive: itemsInventory.glidesteps > 0 };
-      let config = { p1Char: menuState.p1Char, pathTheme: menuState.pathTheme, ...itemsToActive };
-      switchView('game');
-      bootGameplay(config);
+      if (!window.currentUser && window.isFirebaseReady) return showCustomAlert("LOGIN DIPERLUKAN", "Silakan login terlebih dahulu untuk bermain.", `<button class="btn btn-green btn-inline" onclick="closeModal('messageModal'); openAuthModal('login');">LOGIN</button><button class="btn btn-red btn-inline" onclick="closeModal('messageModal')">BATAL</button>`);
+      window.location.href = "gameplay.html?mode=offline";
     }
+
     function startOnlinePVPGame(matchId, matchData, isChallenger) {
-      isOnlinePVP = true;
-      activeMatchId = matchId;
-      switchView('game');
-      el.p1Label.innerText = isChallenger ? matchData.challengerName : matchData.targetName;
-      el.p2Label.innerText = isChallenger ? matchData.targetName : matchData.challengerName;
-      bootOnlineGameplay(matchData, isChallenger);
+      localStorage.setItem('tiletether_match_data', JSON.stringify(matchData));
+      window.location.href = `gameplay.html?mode=online&matchId=${matchId}&isChallenger=${isChallenger}`;
     }
-    function switchView(target) {
-      if(target === 'game') {
-        document.getElementById('menuView').style.display = 'none';
-        document.getElementById('gameView').style.display = 'flex';
-        unifiedAudio.menu.pause();
-      } else {
-        document.getElementById('gameView').style.display = 'none';
-        document.getElementById('menuView').style.display = 'flex';
-        unifiedAudio.play.pause(); unifiedAudio.win.pause(); unifiedAudio.lose.pause();
-        unifiedAudio.menu.play().catch(()=>{});
-      }
-    }
-    function exitToMenu() { 
-      stopGameLoop(); 
-      if (matchListenerUnsub) matchListenerUnsub();
-      switchView('menu'); 
-      updateDashboard(); 
-    }
-    const AI_PERSONALITIES = { bob: { proximityWeight: -2, spaceWeight: 5, randomness: 0.1 }, greg: { proximityWeight: 4, spaceWeight: 1, randomness: 0.1 }, eva: { proximityWeight: -1, spaceWeight: 4, randomness: 0.0 }, choco: { proximityWeight: 0, spaceWeight: 1, randomness: 0.8 }, jessy: { proximityWeight: 1, spaceWeight: 3, randomness: 0.2 }, default: { proximityWeight: 0, spaceWeight: 2, randomness: 0.4 } };
-    let equippedSlots = [null, null, null];
-    let gameState = {};
-    let gameTickInterval = null;
-    const el = {
-      board: document.getElementById('board'), boardWrapper: document.getElementById('boardWrapper'),
-      piecesLayer: document.getElementById('piecesLayer'), pieceNodes: [document.getElementById('piece0'), document.getElementById('piece1')],
-      dpad: document.getElementById('dpad'), status: document.getElementById('status'), turnInfo: document.getElementById('turnInfo'),
-      p1Label: document.getElementById('p1ScoreLabel'), p2Label: document.getElementById('p2ScoreLabel'),
-      popup: document.getElementById('gameOverPopup'), popupMsg: document.getElementById('popupMsg'), 
-      popupImg: document.getElementById('popupCharImg'), popupCoinMsg: document.getElementById('popupCoinMsg')
-    };
-    const ctx = el.dpad.getContext('2d'); ctx.imageSmoothingEnabled = false;
-    function drawHeaderIcons() {
-      const cMenu = document.getElementById('iconMenu').getContext('2d');
-      cMenu.imageSmoothingEnabled = false; cMenu.clearRect(0,0,28,28); cMenu.fillStyle = '#ffffff'; cMenu.beginPath(); cMenu.moveTo(14, 4); cMenu.lineTo(3, 14); cMenu.lineTo(25, 14); cMenu.closePath(); cMenu.fill(); cMenu.lineWidth = 2; cMenu.strokeStyle = '#000000'; cMenu.stroke(); cMenu.fillRect(6, 13, 16, 11); cMenu.strokeRect(6, 13, 16, 11); cMenu.fillStyle = '#000000'; cMenu.fillRect(11, 17, 6, 7);
-      const cItem = document.getElementById('iconItems').getContext('2d');
-      cItem.imageSmoothingEnabled = false; cItem.clearRect(0,0,28,28); cItem.fillStyle = '#ffd700'; cItem.fillRect(4, 9, 20, 15); cItem.lineWidth = 2; cItem.strokeStyle = '#000000'; cItem.strokeRect(4, 9, 20, 15); cItem.fillStyle = '#d4af37'; cItem.fillRect(6, 6, 16, 5); cItem.strokeRect(6, 6, 16, 5); cItem.fillStyle = '#ffffff'; cItem.fillRect(11, 13, 6, 6); cItem.strokeRect(11, 13, 6, 6);
-      const cRules = document.getElementById('iconRules').getContext('2d');
-      cRules.imageSmoothingEnabled = false; cRules.clearRect(0,0,28,28); cRules.fillStyle = '#ffffff'; cRules.font = 'bold 22px "Courier New", monospace'; cRules.textAlign = 'center'; cRules.textBaseline = 'middle'; cRules.lineWidth = 3; cRules.strokeStyle = '#000000'; cRules.strokeText('?', 14, 15); cRules.fillText('?', 14, 15);
-    }
-    drawHeaderIcons();
-    function bootGameplay(config) {
-        gameState = { 
-            size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, 
-            p1Char: config.p1Char, pathTheme: config.pathTheme, startTime: 0, 
-            antideadActive: false, glidestepsActive: false,
-            stalestillActive: false, stalestillCharges: 0, usedGlidesteps: false
-        };
-        initGame();
-        if(gameTickInterval) clearInterval(gameTickInterval);
-        gameTickInterval = setInterval(gameLoopTick, 150);
-    }
-    function bootOnlineGameplay(matchData, isChallenger) {
-      gameState = {
-        size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0,
-        pathTheme: menuState.pathTheme, startTime: Date.now(), isOnline: true,
-        isChallenger: isChallenger, matchData: matchData,
-        antideadActive: equippedSlots.includes('antidead')
-      };
-      const oppChar = isChallenger ? matchData.targetChar : matchData.challengerChar;
-      gameState.players = [
-        { name: menuState.p1Char, x: null, y: null, pose: 'idle', uid: window.currentUser ? window.currentUser.uid : 'guest' },
-        { name: oppChar || 'alice', x: null, y: null, pose: 'idle', uid: isChallenger ? matchData.targetUid : matchData.challengerUid }
-      ];
-      initGameOnline();
-      if(gameTickInterval) clearInterval(gameTickInterval);
-      gameTickInterval = setInterval(gameLoopTick, 150);
-      matchListenerUnsub = window.listenOnlineMatchState(activeMatchId, (data) => {
-        if (data.gameState) {
-          gameState.phase = data.gameState.phase;
-          gameState.turn = (data.currentTurnUid === window.currentUser.uid) ? 0 : 1;
-          gameState.burned = new Map(JSON.parse(data.gameState.burnedArr || "[]"));
-          gameState.players[0].x = isChallenger ? data.gameState.p1X : data.gameState.p2X;
-          gameState.players[0].y = isChallenger ? data.gameState.p1Y : data.gameState.p2Y;
-          gameState.players[1].x = isChallenger ? data.gameState.p2X : data.gameState.p1X;
-          gameState.players[1].y = isChallenger ? data.gameState.p2Y : data.gameState.p1Y;
-          updateUI();
-          if (gameState.phase === 'play' && gameState.turn === 0) {
-            if (getLegalMoves(0).length === 0) {
-              if (gameState.antideadActive) {
-                triggerAntidead(0);
-              } else {
-                window.finishOnlineMatchCloud(activeMatchId, gameState.players[1].uid);
-              }
-            }
-          }
-        }
-        if (data.status === "finished") {
-          handleOnlineGameFinished(data.winnerUid);
-        }
-      });
-    }
-    function stopGameLoop() { if (gameTickInterval) clearInterval(gameTickInterval); }
-    function gameLoopTick() {
-      gameState.tick++; updatePiecesLayer(); 
-      if (gameState.phase === 'over' && el.popup.style.display === 'flex' && !el.popupMsg.innerText.includes("DEAD")) {
-        let winP = gameState.players[0]; 
-        el.popupImg.src = `characters/${winP.name.toLowerCase()}/jump_${ANIM_FRAMES[gameState.tick % 4]}.png`;
-      }
-    }
-    function openEquipment() { renderEquipment(); document.getElementById('equipmentModal').style.display = 'flex'; }
-    function closeEquipment() { document.getElementById('equipmentModal').style.display = 'none'; updateActiveItems(); }
-    function renderEquipment() {
-      for (let i = 0; i < 3; i++) {
-        const slotEl = document.getElementById(`eqSlot-${i}`);
-        if (equippedSlots[i]) { slotEl.innerHTML = `<img src="${ITEM_METADATA[equippedSlots[i]].img}" onerror="this.src='characters/bob/idle_2.png'">`; slotEl.style.opacity = itemsInventory[equippedSlots[i]] > 0 ? '1' : '0.5'; } 
-        else { equippedSlots[i] = null; slotEl.innerHTML = ''; slotEl.style.opacity = '1'; }
-      }
-      const gridContainer = document.getElementById('mcInventoryGrid'); gridContainer.innerHTML = '';
-      Object.keys(itemsInventory).forEach(id => {
-        if (itemsInventory[id] > 0 && !equippedSlots.includes(id)) {
-            const slot = document.createElement('div'); slot.className = 'mc-slot';
-            slot.innerHTML = `<img src="${ITEM_METADATA[id].img}" onerror="this.src='characters/bob/idle_2.png'"><div class="mc-count">${itemsInventory[id]}</div>`;
-            slot.onclick = () => equipItem(id); gridContainer.appendChild(slot);
-        }
-      });
-    }
-    function equipItem(id) { 
-      let emptyIdx = equippedSlots.indexOf(null); 
-      if (emptyIdx === -1) return; 
-      if (itemsInventory[id] <= 0) return showCustomAlert("HABIS", "Item di inventory habis!");
-      itemsInventory[id]--;
-      window.userData.items = itemsInventory;
-      saveLocalData();
-      if (window.saveUserDataToCloud) window.saveUserDataToCloud();
-      equippedSlots[emptyIdx] = id; 
-      renderEquipment(); 
-      updateActiveItems();
-    }
-    function unequipItem(index) { 
-      if (equippedSlots[index]) { 
-        let id = equippedSlots[index];
-        itemsInventory[id]++;
-        window.userData.items = itemsInventory;
-        saveLocalData();
-        if (window.saveUserDataToCloud) window.saveUserDataToCloud();
-        equippedSlots[index] = null; 
-        renderEquipment(); 
-        updateActiveItems();
-      } 
-    }
-    function updateActiveItems() {
-      let wasStalestill = gameState.stalestillActive;
-      gameState.antideadActive = equippedSlots.includes('antidead');
-      gameState.stalestillActive = equippedSlots.includes('stalestill');
-      gameState.glidestepsActive = equippedSlots.includes('glidesteps') || gameState.usedGlidesteps;
-      if (gameState.stalestillActive && !wasStalestill) { 
-        gameState.stalestillCharges = 3; 
-      } else if (!gameState.stalestillActive && gameState.phase !== 'play') { 
-        gameState.stalestillCharges = 0; 
-      }
-      if (gameState.phase === 'play') drawDPad(getLegalMoves(gameState.turn));
-    }
-    function triggerPlayPhase() { gameState.phase = 'play'; gameState.turn = 0; unifiedAudio.play.play().catch(()=>{}); updateUI(); }
-    function initGame() {
-      unifiedAudio.win.pause(); unifiedAudio.lose.pause(); el.popup.style.display = 'none';
-      for (let i = 0; i < 3; i++) { if (equippedSlots[i] && itemsInventory[equippedSlots[i]] <= 0) equippedSlots[i] = null; }
-      gameState.usedGlidesteps = false; updateActiveItems();
-      let p2Char = getUniqueRandomChar(gameState.p1Char);
-      gameState.phase = 'place'; gameState.turn = 0; gameState.burned.clear(); gameState.startTime = Date.now();
-      gameState.players = [ { name: gameState.p1Char, x: null, y: null, pose: 'idle' }, { name: p2Char, x: null, y: null, pose: 'idle' } ];
-      el.p1Label.innerText = "P1: " + gameState.players[0].name.toUpperCase();
-      el.p2Label.innerText = "AI: " + gameState.players[1].name.toUpperCase();
-      el.boardWrapper.style.setProperty('--grid-size', gameState.size);
-      el.pieceNodes[0].classList.remove('visible'); el.pieceNodes[1].classList.remove('visible');
-      updateUI(); drawDPad();
-    }
-    function initGameOnline() {
-      unifiedAudio.win.pause(); unifiedAudio.lose.pause(); el.popup.style.display = 'none';
-      gameState.burned.clear();
-      el.boardWrapper.style.setProperty('--grid-size', gameState.size);
-      el.pieceNodes[0].classList.remove('visible'); el.pieceNodes[1].classList.remove('visible');
-      updateUI(); drawDPad();
-    }
-    function getUniqueRandomChar(excludeChar) { const available = DISPLAY_CHARACTERS.filter(c => c !== excludeChar); return available[Math.floor(Math.random() * available.length)]; }
-    function key(x, y) { return `${x},${y}`; }
-    function inBounds(x, y) { return x >= 0 && y >= 0 && x < gameState.size && y < gameState.size; }
-    function occupiedBy(x, y) { return gameState.players.findIndex(p => p.x === x && p.y === y); }
-    function getLegalMoves(pIndex) {
-      const p = gameState.players[pIndex]; if (p.x === null) return [];
-      let moves = [];
-      DIRS.forEach((d, index) => { const nx = p.x + d.dx, ny = p.y + d.dy; if (inBounds(nx, ny) && !gameState.burned.has(key(nx, ny)) && occupiedBy(nx, ny) === -1) moves.push(index); });
-      return moves;
-    }
-    function countAvailableSpace(startX, startY) {
-      let visited = new Set(), queue = [[startX, startY]], count = 0; visited.add(`${startX},${startY}`);
-      while(queue.length > 0 && count < 15) {
-        let [cx, cy] = queue.shift(); count++;
-        for (let d of DIRS) {
-          let nx = cx + d.dx, ny = cy + d.dy, k = key(nx, ny);
-          if (inBounds(nx, ny) && !gameState.burned.has(k) && occupiedBy(nx, ny) === -1 && !visited.has(k)) { visited.add(k); queue.push([nx, ny]); }
-        }
-      }
-      return count;
-    }
-    function onCellClick(x, y) {
-      const k = key(x, y), occ = occupiedBy(x, y);
-      if (gameState.phase === 'place') {
-        if (gameState.burned.has(k) || occ !== -1) return;
-        if (gameState.turn !== 0) return;
-        const p = gameState.players[gameState.turn]; p.x = x; p.y = y; gameState.burned.set(k, p.name);
-        if (isOnlinePVP) {
-          syncOnlineMove();
-        } else {
-          gameState.turn = 1; updateUI(); setTimeout(aiPlace, 500); 
-        }
-      } else if (gameState.phase === 'play') {
-        if (gameState.turn !== 0) return;
-        const legalMoves = getLegalMoves(gameState.turn);
-        for (let dirIdx of legalMoves) { if (gameState.players[gameState.turn].x + DIRS[dirIdx].dx === x && gameState.players[gameState.turn].y + DIRS[dirIdx].dy === y) { moveCurrent(dirIdx); break; } }
-      }
-    }
-    function moveCurrent(dirIndex) {
-      if (gameState.phase !== 'play' || !getLegalMoves(gameState.turn).includes(dirIndex)) return;
-      let isGliding = (gameState.turn === 0 && gameState.glidestepsActive);
-      const p = gameState.players[gameState.turn], d = DIRS[dirIndex];
-      if (isGliding) {
-        while (true) {
-          let nx = p.x + d.dx, ny = p.y + d.dy;
-          if (inBounds(nx, ny) && !gameState.burned.has(key(nx, ny)) && occupiedBy(nx, ny) === -1) { 
-            gameState.burned.set(key(p.x, p.y), p.name); 
-            p.x = nx; 
-            p.y = ny; 
-          } else {
-            break;
-          }
-        }
-        gameState.glidestepsActive = false;
-      } else { 
-        gameState.burned.set(key(p.x, p.y), p.name); 
-        p.x += d.dx; 
-        p.y += d.dy; 
-      }
-      p.pose = 'jump'; gameState.turn = 1 - gameState.turn; 
-      if (isOnlinePVP) {
-        syncOnlineMove();
-      } else {
-        checkWin(); updateUI();
-        el.boardWrapper.classList.remove('shake-active'); void el.boardWrapper.offsetWidth; el.boardWrapper.classList.add('shake-active');
-        setTimeout(() => { if (gameState.phase !== 'over') { p.pose = 'idle'; updatePiecesLayer(); } }, 350);
-        if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600);
-      }
-    }
-    async function syncOnlineMove() {
-      if(!window.isFirebaseReady) return;
-      const p1X = gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x;
-      const p1Y = gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y;
-      const p2X = gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x;
-      const p2Y = gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y;
-      let nextPhase = gameState.phase;
-      if (gameState.phase === 'place' && p1X !== null && p2X !== null) {
-        nextPhase = 'play';
-      }
-      const statePayload = {
-        phase: nextPhase,
-        p1X, p1Y, p2X, p2Y,
-        burnedArr: JSON.stringify(Array.from(gameState.burned.entries()))
-      };
-      const opponentUid = gameState.players[1].uid;
-      await window.updateOnlineGameStateCloud(activeMatchId, statePayload, opponentUid);
-      if (getLegalMoves(0).length === 0) {
-        if (gameState.antideadActive) {
-          triggerAntidead(0);
-        } else {
-          await window.finishOnlineMatchCloud(activeMatchId, opponentUid);
-        }
-      }
-    }
-    async function handleOnlineGameFinished(winnerUid) {
-      gameState.phase = 'over';
-      const isWinner = window.currentUser && winnerUid === window.currentUser.uid;
-      const bet = gameState.matchData.betCoin;
-      if (isWinner) {
-        window.userData.coins += bet;
-        window.userData.wins += 1;
-        el.popupMsg.innerText = "YOU SURVIVE (MENANG!)";
-        el.popupCoinMsg.innerText = `+${bet} COINS`;
-        unifiedAudio.win.play().catch(()=>{});
-      } else {
-        window.userData.coins = Math.max(0, window.userData.coins - bet);
-        window.userData.losses += 1;
-        el.popupMsg.innerText = "YOU DEAD (KALAH!)";
-        el.popupCoinMsg.innerText = `-${bet} COINS`;
-        unifiedAudio.lose.play().catch(()=>{});
-      }
-      saveLocalData();
-      if (window.saveUserDataToCloud) await window.saveUserDataToCloud();
-      el.popup.style.display = 'flex';
-      if (window.isFirebaseReady && activeMatchId) {
-         setTimeout(async () => {
-           try { await window.fbDeleteDoc(window.fbDoc(window.fbDb, "matches", activeMatchId)); } catch(e) {}
-         }, 3000);
-      }
-    }
-    function triggerAntidead(pIndex) {
-      if (pIndex === 0) { gameState.antideadActive = false; }
-      const p = gameState.players[pIndex];
-      const powEl = document.createElement('div'); powEl.className = 'pow-anim'; powEl.style.transform = `translate(calc(${p.x} * 100%), calc(${p.y} * 100%))`; powEl.style.zIndex = 300; powEl.innerHTML = '<img src="items/antidead.png" style="width:180%; height:180%; filter: drop-shadow(0 0 10px gold); animation: popOpen 0.5s;">'; el.piecesLayer.appendChild(powEl); setTimeout(() => powEl.remove(), 800);
-      for (let dx = -1; dx <= 1; dx++) { for (let dy = -1; dy <= 1; dy++) { let k = key(p.x + dx, p.y + dy); if (gameState.burned.has(k)) gameState.burned.delete(k); } }
-      gameState.turn = 0; updateUI();
-      if (isOnlinePVP) syncOnlineMove();
-    }
-    function checkWin() {
-      if (getLegalMoves(gameState.turn).length === 0) {
-        if (gameState.turn === 0 && gameState.antideadActive) { triggerAntidead(0); return; }
-        gameState.phase = 'over';
-        gameState.players[gameState.turn].pose = 'dead'; gameState.players[1 - gameState.turn].pose = 'jump'; unifiedAudio.play.pause();
-        if (gameState.turn === 0) { unifiedAudio.lose.currentTime = 0; unifiedAudio.lose.play().catch(()=>{}); } else { unifiedAudio.win.currentTime = 0; unifiedAudio.win.play().catch(()=>{}); }
-        setTimeout(showGameOverPopup, 400);
-      }
-    }
-    async function calculateCoins() {
-      let J = gameState.burned.size; 
-      const t = Math.floor((Date.now() - gameState.startTime) / 1000); 
-      const W = (gameState.turn === 0) ? 0.25 : 1.0;
-      const timeBonus = Math.max(0, 120 - t) * 0.5;
-      const earned = Math.floor(((J * 2) + timeBonus) * 1.0 * W);
-      totalCoins += earned; 
-      if (gameState.turn === 1) {
-        window.userData.wins = (window.userData.wins || 0) + 1;
-      } else {
-        window.userData.losses = (window.userData.losses || 0) + 1;
-      }
-      window.userData.coins = totalCoins;
-      saveLocalData();
-      if (window.saveUserDataToCloud) await window.saveUserDataToCloud();
-      return earned;
-    }
-    async function showGameOverPopup() {
-      const earnedCoins = await calculateCoins();
-      el.popupCoinMsg.innerText = `+${earnedCoins} COINS`;
-      const loserIndex = gameState.turn; let displayPlayer = gameState.players[0];
-      if (loserIndex === 0) { el.popupMsg.innerText = "You Dead"; el.popupImg.src = `characters/${displayPlayer.name.toLowerCase()}/dead.png`; } 
-      else { el.popupMsg.innerText = "You Survive"; el.popupImg.src = `characters/${displayPlayer.name.toLowerCase()}/jump_${ANIM_FRAMES[gameState.tick % 4]}.png`; }
-      el.popup.style.display = 'flex';
-    }
-    function handlePopupChoice(choice) { 
-      if (choice === 'yeah') {
-        if(isOnlinePVP) exitToMenu(); else initGame();
-      } else {
-        exitToMenu(); 
-      }
-    }
-    function aiPlace() { placeRandomAI(); triggerPlayPhase(); }
-    function placeRandomAI() {
-      let placed = false, attempts = 0;
-      while(!placed && attempts < 100) {
-        attempts++; let rx = Math.floor(Math.random() * gameState.size), ry = Math.floor(Math.random() * gameState.size);
-        if(!gameState.burned.has(key(rx,ry)) && occupiedBy(rx,ry) === -1 && Math.abs(rx - gameState.players[0].x) + Math.abs(ry - gameState.players[0].y) > 2) { gameState.players[1].x = rx; gameState.players[1].y = ry; gameState.burned.set(key(rx,ry), gameState.players[1].name); placed = true; }
-      }
-      if(!placed) for(let x=0; x<gameState.size; x++) for(let y=0; y<gameState.size; y++) if(!gameState.burned.has(key(x,y)) && occupiedBy(x,y) === -1) { gameState.players[1].x = x; gameState.players[1].y = y; gameState.burned.set(key(x,y), gameState.players[1].name); return; }
-    }
-    function aiMove() {
-      if(gameState.phase !== 'play' || gameState.turn !== 1) return;
-      const moves = getLegalMoves(1); if(moves.length === 0) return;
-      const aiChar = gameState.players[1].name.toLowerCase(), human = gameState.players[0], ai = gameState.players[1];
-      const p = AI_PERSONALITIES[aiChar] || AI_PERSONALITIES['default'];
-      let bestMoveIndex = moves.map(i => {
-        const nx = ai.x + DIRS[i].dx, ny = ai.y + DIRS[i].dy;
-        return { index: i, score: (Math.max(Math.abs(nx - human.x), Math.abs(ny - human.y)) * p.proximityWeight) + (countAvailableSpace(nx, ny) * p.spaceWeight) + (Math.random() * 20 * p.randomness) };
-      }).sort((a, b) => b.score - a.score)[0].index;
-      moveCurrent(bestMoveIndex);
-    }
-    function drawDPad(legalMoves = []) {
-      const cw = el.dpad.width, ch = el.dpad.height, cx = cw / 2, cy = ch / 2; ctx.clearRect(0, 0, cw, ch);
-      ctx.beginPath(); ctx.arc(cx, cy, cw/2 - 4, 0, Math.PI * 2); ctx.fillStyle = '#5c2a0d'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#000000'; ctx.stroke();
-      if (gameState.stalestillCharges > 0 && gameState.turn === 0 && gameState.phase === 'play') {
-        ctx.beginPath(); ctx.arc(cx, cy, cw * 0.12, 0, Math.PI * 2); ctx.fillStyle = '#8b4513'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
-        const img = document.getElementById('stalestillImg'); if (img.complete) ctx.drawImage(img, cx - (cw * 0.08), cy - (cw * 0.08), cw * 0.16, cw * 0.16);
-        ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.floor(cw * 0.06)}px monospace`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(gameState.stalestillCharges, cx + (cw * 0.1), cy + (cw * 0.1));
-      } else { ctx.beginPath(); ctx.arc(cx, cy, cw * 0.1, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill(); }
-      const isActive = gameState.phase === 'play' && gameState.turn === 0;
-      const aColor = gameState.phase === 'play' ? (gameState.turn === 0 ? '#1976d2' : '#d32f2f') : '#4caf50'; 
-      const dirConfig = [ { idx: 4, angle: 0, label: "→" }, { idx: 7, angle: Math.PI / 4, label: "↘" }, { idx: 6, angle: Math.PI / 2, label: "↓" }, { idx: 5, angle: Math.PI * 3 / 4, label: "↙" }, { idx: 3, angle: Math.PI, label: "←" }, { idx: 0, angle: Math.PI * 5 / 4, label: "↖" }, { idx: 1, angle: Math.PI * 3 / 2, label: "↑" }, { idx: 2, angle: Math.PI * 7 / 4, label: "↗" } ];
-      dirConfig.forEach(d => {
-        const isLegal = isActive && legalMoves.includes(d.idx), btnRadius = cw * 0.115, bx = cx + Math.cos(d.angle) * (cw * 0.33), by = cy + Math.sin(d.angle) * (cw * 0.33);
-        ctx.beginPath(); ctx.arc(bx, by, btnRadius, 0, Math.PI * 2); ctx.fillStyle = isLegal ? aColor : '#5c2a0d'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#000000'; ctx.stroke();
-        ctx.fillStyle = isLegal ? '#fff' : '#8b4513'; ctx.font = `bold ${Math.floor(cw * 0.09)}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(d.label, bx, by + 2);
-      });
-    }
-    function useStalestill() {
-        if (gameState.phase !== 'play') return;
-        gameState.turn = 1 - gameState.turn; unifiedAudio.click.currentTime = 0; unifiedAudio.click.play().catch(()=>{});
-        if (isOnlinePVP) {
-          syncOnlineMove();
-        } else {
-          checkWin(); updateUI();
-          if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600);
-        }
-    }
-    function updateUI() {
-      el.board.style.backgroundImage = `url('paths/${gameState.pathTheme}.png')`; el.board.style.gridTemplateColumns = `repeat(${gameState.size}, 1fr)`; el.board.style.gridTemplateRows = `repeat(${gameState.size}, 1fr)`; el.board.innerHTML = '';
-      const validKeys = new Set();
-      if(gameState.phase === 'play' && gameState.turn === 0) getLegalMoves(gameState.turn).forEach(idx => validKeys.add(key(gameState.players[gameState.turn].x + DIRS[idx].dx, gameState.players[gameState.turn].y + DIRS[idx].dy)));
-      for (let y = 0; y < gameState.size; y++) for (let x = 0; x < gameState.size; x++) {
-          const btn = document.createElement('div'); btn.className = 'cell'; btn.style.gridColumn = x + 1; btn.style.gridRow = y + 1; const k = key(x, y);
-          if (gameState.burned.has(k)) { btn.classList.add('burned'); btn.innerHTML += `<img src="characters/${gameState.burned.get(k)}/jejak.png" class="jejak-img">`; } else if (validKeys.has(k)) btn.classList.add('valid');
-          btn.onclick = () => onCellClick(x, y); el.board.appendChild(btn);
-      }
-      updatePiecesLayer();
-      if (gameState.phase === 'place') { el.turnInfo.innerHTML = `<span style="color: var(--gold);">PLACE MODE</span>`; el.status.innerText = gameState.turn === 0 ? "P1: LETAKKAN KARAKTER" : `MENUNGGU LAWAN...`; } 
-      else if (gameState.phase === 'play') { 
-        if (gameState.turn === 0) { el.turnInfo.innerHTML = `<span style="color: var(--blue);">◀</span>VS<span style="opacity: 0.25;">▶</span>`; el.status.innerText = "GILIRAN KAMU: LOMPAT!"; } 
-        else { el.turnInfo.innerHTML = `<span style="opacity: 0.25;">◀</span>VS<span style="color: var(--red);">▶</span>`; el.status.innerText = `GILIRAN LAWAN...`; }
-      } 
-      else if (gameState.phase === 'over') { el.turnInfo.innerHTML = `<span style="color: var(--green);">GAME OVER</span>`; el.status.innerText = `${gameState.turn === 0 ? "LAWAN" : "KAMU"} MENANG!`; }
-      drawDPad(gameState.phase === 'play' ? getLegalMoves(gameState.turn) : []);
-    }
-    function updatePiecesLayer() {
-      const frameNum = ANIM_FRAMES[gameState.tick % 4];
-      gameState.players.forEach((p, idx) => {
-        const node = el.pieceNodes[idx];
-        if (p.x !== null && p.y !== null) { node.classList.add('visible'); node.style.setProperty('--px', p.x); node.style.setProperty('--py', p.y); node.style.zIndex = 50 + p.y; const img = node.querySelector('img'); img.src = `characters/${p.name.toLowerCase()}/${p.pose === 'dead' ? 'dead.png' : `${p.pose}_${frameNum}.png`}`; img.style.width = '150%'; img.style.height = '150%'; }
-      });
-    }
-    el.dpad.addEventListener('click', (e) => {
-      if (gameState.phase !== 'play' || gameState.turn !== 0) return;
-      const rect = el.dpad.getBoundingClientRect(); const scaleX = el.dpad.width / rect.width; const scaleY = el.dpad.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX - el.dpad.width / 2; const y = (e.clientY - rect.top) * scaleY - el.dpad.width / 2; const dist = Math.sqrt(x*x + y*y);
-      if (dist < el.dpad.width * 0.12) { 
-        if (gameState.turn === 0 && gameState.stalestillCharges > 0) { 
-          gameState.stalestillCharges--; 
-          useStalestill(); 
-        } 
-        return; 
-      }
-      if (dist > el.dpad.width * 0.45) return;
-      let angle = Math.atan2(y, x); if (angle < 0) angle += Math.PI * 2;
-      const sector = Math.floor(((angle + Math.PI / 8) % (Math.PI * 2)) / (Math.PI / 4));
-      const sectorToIdx = [4, 7, 6, 5, 3, 0, 1, 2]; const dIdx = sectorToIdx[sector];
-      if (dIdx !== undefined) moveCurrent(dIdx);
-    });
-    document.getElementById('stalestillImg').onload = () => { if(gameState.phase === 'play') drawDPad(getLegalMoves(gameState.turn)); };
+
     updateDashboard();
   </script>
 </body>
