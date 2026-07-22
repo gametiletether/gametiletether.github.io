@@ -270,7 +270,7 @@
         const matchData = JSON.parse(localStorage.getItem('tiletether_match_data') || '{}');
         el.p1Label.innerText = isChallenger ? matchData.challengerName : matchData.targetName;
         el.p2Label.innerText = isChallenger ? matchData.targetName : matchData.challengerName;
-        setTimeout(() => bootOnlineGameplay(matchData, isChallenger), 500); // Allow FB to init
+        setTimeout(() => bootOnlineGameplay(matchData, isChallenger), 500); 
       } else {
         isOnlinePVP = false;
         let itemsToActive = { antideadActive: itemsInventory.antidead > 0, stalestillActive: itemsInventory.stalestill > 0, glidestepsActive: itemsInventory.glidesteps > 0 };
@@ -286,7 +286,7 @@
     }
 
     function bootGameplay(config) {
-        gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, p1Char: config.p1Char, pathTheme: config.pathTheme, startTime: 0, antideadActive: false, glidestepsActive: false, stalestillActive: false, stalestillCharges: 0, usedGlidesteps: false };
+        gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, p1Char: config.p1Char, pathTheme: config.pathTheme, startTime: 0, antideadActive: false, glidestepsActive: false, stalestillActive: false, stalestillCharges: 0, itemsConsumed: false };
         initGame();
         if(gameTickInterval) clearInterval(gameTickInterval);
         gameTickInterval = setInterval(gameLoopTick, 150);
@@ -294,7 +294,7 @@
 
     function bootOnlineGameplay(matchData, isChallenger) {
       if(!window.isFirebaseReady) { alert("Firebase disconnected."); exitToMenu(); return; }
-      gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, pathTheme: window.userData.selectedPath || 'path_01', startTime: Date.now(), isOnline: true, isChallenger: isChallenger, matchData: matchData, antideadActive: equippedSlots.includes('antidead') };
+      gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, pathTheme: window.userData.selectedPath || 'path_01', startTime: Date.now(), isOnline: true, isChallenger: isChallenger, matchData: matchData, antideadActive: equippedSlots.includes('antidead'), itemsConsumed: false };
       const oppChar = isChallenger ? matchData.targetChar : matchData.challengerChar;
       gameState.players = [ { name: window.userData.selectedChar || 'bob', x: null, y: null, pose: 'idle', uid: window.currentUser ? window.currentUser.uid : 'guest' }, { name: oppChar || 'alice', x: null, y: null, pose: 'idle', uid: isChallenger ? matchData.targetUid : matchData.challengerUid } ];
       initGameOnline();
@@ -306,10 +306,21 @@
           gameState.phase = data.gameState.phase;
           gameState.turn = (data.currentTurnUid === window.currentUser.uid) ? 0 : 1;
           gameState.burned = new Map(JSON.parse(data.gameState.burnedArr || "[]"));
+          
+          let prevP2X = gameState.players[1].x;
+          let prevP2Y = gameState.players[1].y;
+
           gameState.players[0].x = isChallenger ? data.gameState.p1X : data.gameState.p2X;
           gameState.players[0].y = isChallenger ? data.gameState.p1Y : data.gameState.p2Y;
           gameState.players[1].x = isChallenger ? data.gameState.p2X : data.gameState.p1X;
           gameState.players[1].y = isChallenger ? data.gameState.p2Y : data.gameState.p1Y;
+
+          // Sync animasi lompatan musuh online
+          if (gameState.phase === 'play' && (gameState.players[1].x !== prevP2X || gameState.players[1].y !== prevP2Y) && prevP2X !== null) {
+              gameState.players[1].pose = 'jump';
+              setTimeout(() => { if (gameState.phase !== 'over') { gameState.players[1].pose = 'idle'; updatePiecesLayer(); } }, 350);
+          }
+
           updateUI();
           if (gameState.phase === 'play' && gameState.turn === 0) {
             if (getLegalMoves(0).length === 0) { if (gameState.antideadActive) triggerAntidead(0); else window.finishOnlineMatchCloud(activeMatchId, gameState.players[1].uid); }
@@ -327,6 +338,18 @@
       }
     }
 
+    function consumeItems() {
+        if (gameState.itemsConsumed) return;
+        equippedSlots.forEach((id, index) => {
+            if (id && itemsInventory[id] > 0) {
+                itemsInventory[id]--;
+            }
+        });
+        window.userData.items = itemsInventory;
+        saveLocalData();
+        gameState.itemsConsumed = true;
+    }
+
     function openEquipment() { renderEquipment(); document.getElementById('equipmentModal').style.display = 'flex'; }
     function closeEquipment() { document.getElementById('equipmentModal').style.display = 'none'; updateActiveItems(); }
     
@@ -338,24 +361,27 @@
       }
       const gridContainer = document.getElementById('mcInventoryGrid'); gridContainer.innerHTML = '';
       Object.keys(itemsInventory).forEach(id => {
-        if (itemsInventory[id] > 0 && !equippedSlots.includes(id)) {
-            const slot = document.createElement('div'); slot.className = 'mc-slot';
-            slot.innerHTML = `<img src="${ITEM_METADATA[id].img}" onerror="this.src='characters/bob/idle_2.png'"><div class="mc-count">${itemsInventory[id]}</div>`;
-            slot.onclick = () => equipItem(id); gridContainer.appendChild(slot);
+        if (itemsInventory[id] > 0) {
+            let equippedCount = equippedSlots.filter(s => s === id).length;
+            if (itemsInventory[id] - equippedCount > 0) {
+                const slot = document.createElement('div'); slot.className = 'mc-slot';
+                slot.innerHTML = `<img src="${ITEM_METADATA[id].img}" onerror="this.src='characters/bob/idle_2.png'"><div class="mc-count">${itemsInventory[id] - equippedCount}</div>`;
+                slot.onclick = () => equipItem(id); gridContainer.appendChild(slot);
+            }
         }
       });
     }
     
     function equipItem(id) { 
       let emptyIdx = equippedSlots.indexOf(null); if (emptyIdx === -1) return; 
-      if (itemsInventory[id] <= 0) return alert("Item di inventory habis!");
-      itemsInventory[id]--; window.userData.items = itemsInventory; saveLocalData();
+      let equippedCount = equippedSlots.filter(s => s === id).length;
+      if (itemsInventory[id] - equippedCount <= 0) return alert("Item di inventory tidak cukup!");
+      
       equippedSlots[emptyIdx] = id; renderEquipment(); updateActiveItems();
     }
     
     function unequipItem(index) { 
       if (equippedSlots[index]) { 
-        let id = equippedSlots[index]; itemsInventory[id]++; window.userData.items = itemsInventory; saveLocalData();
         equippedSlots[index] = null; renderEquipment(); updateActiveItems();
       } 
     }
@@ -364,7 +390,7 @@
       let wasStalestill = gameState.stalestillActive;
       gameState.antideadActive = equippedSlots.includes('antidead');
       gameState.stalestillActive = equippedSlots.includes('stalestill');
-      gameState.glidestepsActive = equippedSlots.includes('glidesteps') || gameState.usedGlidesteps;
+      gameState.glidestepsActive = equippedSlots.includes('glidesteps');
       if (gameState.stalestillActive && !wasStalestill) gameState.stalestillCharges = 3; 
       else if (!gameState.stalestillActive && gameState.phase !== 'play') gameState.stalestillCharges = 0; 
       if (gameState.phase === 'play') drawDPad(getLegalMoves(gameState.turn));
@@ -374,8 +400,7 @@
     
     function initGame() {
       unifiedAudio.win.pause(); unifiedAudio.lose.pause(); el.popup.style.display = 'none';
-      for (let i = 0; i < 3; i++) { if (equippedSlots[i] && itemsInventory[equippedSlots[i]] <= 0) equippedSlots[i] = null; }
-      gameState.usedGlidesteps = false; updateActiveItems();
+      updateActiveItems();
       let p2Char = getUniqueRandomChar(gameState.p1Char);
       gameState.phase = 'place'; gameState.turn = 0; gameState.burned.clear(); gameState.startTime = Date.now();
       gameState.players = [ { name: gameState.p1Char, x: null, y: null, pose: 'idle' }, { name: p2Char, x: null, y: null, pose: 'idle' } ];
@@ -431,19 +456,29 @@
       if (gameState.phase !== 'play' || !getLegalMoves(gameState.turn).includes(dirIndex)) return;
       let isGliding = (gameState.turn === 0 && gameState.glidestepsActive);
       const p = gameState.players[gameState.turn], d = DIRS[dirIndex];
+      
       if (isGliding) {
         while (true) {
           let nx = p.x + d.dx, ny = p.y + d.dy;
-          if (inBounds(nx, ny) && !gameState.burned.has(key(nx, ny)) && occupiedBy(nx, ny) === -1) { gameState.burned.set(key(p.x, p.y), p.name); p.x = nx; p.y = ny; } else break;
+          if (inBounds(nx, ny) && !gameState.burned.has(key(nx, ny)) && occupiedBy(nx, ny) === -1) { 
+              gameState.burned.set(key(p.x, p.y), p.name); p.x = nx; p.y = ny; 
+          } else break;
         }
-        gameState.glidestepsActive = false;
-      } else { gameState.burned.set(key(p.x, p.y), p.name); p.x += d.dx; p.y += d.dy; }
+      } else { 
+          gameState.burned.set(key(p.x, p.y), p.name); p.x += d.dx; p.y += d.dy; 
+      }
+      
       p.pose = 'jump'; gameState.turn = 1 - gameState.turn; 
-      if (isOnlinePVP) syncOnlineMove();
-      else {
+      
+      // Efek Visual Untuk Move (Baik Local & Online)
+      el.boardWrapper.classList.remove('shake-active'); void el.boardWrapper.offsetWidth; el.boardWrapper.classList.add('shake-active');
+      setTimeout(() => { if (gameState.phase !== 'over') { p.pose = 'idle'; updatePiecesLayer(); } }, 350);
+
+      if (isOnlinePVP) {
+          syncOnlineMove();
+          updateUI();
+      } else {
         checkWin(); updateUI();
-        el.boardWrapper.classList.remove('shake-active'); void el.boardWrapper.offsetWidth; el.boardWrapper.classList.add('shake-active');
-        setTimeout(() => { if (gameState.phase !== 'over') { p.pose = 'idle'; updatePiecesLayer(); } }, 350);
         if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600);
       }
     }
@@ -463,11 +498,31 @@
       gameState.phase = 'over';
       const isWinner = window.currentUser && winnerUid === window.currentUser.uid;
       const bet = gameState.matchData.betCoin;
-      if (isWinner) { window.userData.coins += bet; window.userData.wins += 1; el.popupMsg.innerText = "YOU SURVIVE (MENANG!)"; el.popupCoinMsg.innerText = `+${bet} COINS`; unifiedAudio.win.play().catch(()=>{}); } 
-      else { window.userData.coins = Math.max(0, window.userData.coins - bet); window.userData.losses += 1; el.popupMsg.innerText = "YOU DEAD (KALAH!)"; el.popupCoinMsg.innerText = `-${bet} COINS`; unifiedAudio.lose.play().catch(()=>{}); }
+      consumeItems();
+      
+      if (isWinner) { 
+          window.userData.coins += bet; window.userData.wins += 1; 
+          el.popupMsg.innerText = "YOU SURVIVE (MENANG!)"; 
+          el.popupCoinMsg.innerText = `+${bet} COINS`; 
+          el.popupImg.style.display = 'block';
+          unifiedAudio.win.play().catch(()=>{}); 
+      } else { 
+          window.userData.coins = Math.max(0, window.userData.coins - bet); 
+          window.userData.losses += 1; 
+          el.popupMsg.innerText = "YOU DEAD (KALAH!)"; 
+          el.popupCoinMsg.innerText = `-${bet} COINS`; 
+          el.popupImg.style.display = 'none';
+          unifiedAudio.lose.play().catch(()=>{}); 
+      }
       saveLocalData(); 
       el.popup.style.display = 'flex';
-      if (window.isFirebaseReady && activeMatchId) setTimeout(async () => { try { await window.fbDeleteDoc(window.fbDoc(window.fbDb, "matches", activeMatchId)); } catch(e) {} }, 3000);
+      
+      // Cleanup data pada Firebase tanpa delay lama
+      if (window.isFirebaseReady && activeMatchId) {
+          setTimeout(async () => { 
+              try { await window.fbDeleteDoc(window.fbDoc(window.fbDb, "matches", activeMatchId)); } catch(e) {} 
+          }, 1000);
+      }
     }
     
     function triggerAntidead(pIndex) {
@@ -500,10 +555,17 @@
     }
     
     async function showGameOverPopup() {
+      consumeItems();
       const earnedCoins = await calculateCoins(); el.popupCoinMsg.innerText = `+${earnedCoins} COINS`;
       const loserIndex = gameState.turn; let displayPlayer = gameState.players[0];
-      if (loserIndex === 0) { el.popupMsg.innerText = "You Dead"; el.popupImg.src = `characters/${displayPlayer.name.toLowerCase()}/dead.png`; } 
-      else { el.popupMsg.innerText = "You Survive"; el.popupImg.src = `characters/${displayPlayer.name.toLowerCase()}/jump_${ANIM_FRAMES[gameState.tick % 4]}.png`; }
+      if (loserIndex === 0) { 
+          el.popupMsg.innerText = "You Dead"; 
+          el.popupImg.style.display = 'none'; 
+      } else { 
+          el.popupMsg.innerText = "You Survive"; 
+          el.popupImg.style.display = 'block';
+          el.popupImg.src = `characters/${displayPlayer.name.toLowerCase()}/jump_${ANIM_FRAMES[gameState.tick % 4]}.png`; 
+      }
       el.popup.style.display = 'flex';
     }
     

@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Loading Screen - AAA Edition</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>TileTether - AAA Login & Loading</title>
     <style>
-        /* --- 1. PALET WARNA (Sesuai Tema) --- */
+        /* --- 1. PALET WARNA (Gabungan Tema) --- */
         :root {
-            --gold: #ffd700;
-            --gold-dark: #d4af37;
-            --brown: #8b4513;
-            --brown-dark: #5c2a0d;
-            --green: #4caf50;
-            --green-dark: #2e7d32;
-            --blue: #1976d2;
-            --blue-dark: #0d47a1;
-            --red: #d32f2f;
-            --red-dark: #b71c1c;
+            --gold: #ffd700; --gold-dark: #d4af37;
+            --brown: #8b4513; --brown-dark: #5c2a0d;
+            --green: #4caf50; --green-dark: #2e7d32;
+            --blue: #1976d2; --blue-dark: #0d47a1;
+            --red: #d32f2f; --red-dark: #b71c1c;
+            --shadow: 0 4px 0 rgba(0,0,0,.55), 0 10px 24px rgba(0,0,0,.3);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
         }
 
-        /* --- 2. LATAR BELAKANG DINAMIS --- */
         body {
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background-color: #000; 
+            background-color: #000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
         }
 
-        /* Container khusus untuk background agar bisa dipudarkan (fade-out) bersama loader */
+        /* --- 2. LATAR BELAKANG DINAMIS --- */
         #bg-container {
             position: fixed;
             inset: 0;
@@ -43,7 +40,7 @@
                 radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.12) 0%, transparent 10%),
                 radial-gradient(circle at 75% 15%, rgba(255, 255, 255, 0.15) 0%, transparent 15%),
                 radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
-                linear-gradient(to bottom, #0d1b2a 0%, #1b4965 45%, #4caf50 45.2%, #2e7d32 100%);
+                linear-gradient(to bottom, #0d1b2a 0%, #1b4965 45%, var(--green) 45.2%, var(--green-dark) 100%);
             transition: opacity 0.8s ease-in-out;
         }
 
@@ -59,13 +56,55 @@
             pointer-events: none;
         }
 
-        /* --- 3. ELEMEN PEMUATAN (UI) --- */
+        /* --- 3. UI LOGIN --- */
+        #auth-wrapper {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 10;
+        }
+
+        .popup-box {
+            width: 100%; max-width: 410px; padding: 20px;
+            background: linear-gradient(180deg, var(--brown), var(--brown-dark));
+            border: 4px solid var(--gold); outline: 4px solid #000; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 12px;
+            position: relative;
+        }
+
+        .popup-title {
+            font-size: 18px; font-weight: 900; text-transform: uppercase; color: var(--gold);
+            text-shadow: 2px 2px 0 #000; text-align: center; border-bottom: 2px dashed rgba(255,215,0,.3); padding-bottom: 10px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
+        .form-group label { font-size: 11px; font-weight: 900; color: var(--gold); text-shadow: 1px 1px 0 #000; text-transform: uppercase; }
+        .form-control { background: rgba(0,0,0,0.7); border: 2px solid var(--gold); padding: 10px; color: #fff; font-family: inherit; font-size: 13px; outline: none; }
+        .form-control:focus { border-color: #fff; }
+        
+        .btn {
+            border: 3px solid var(--gold); outline: 3px solid #000;
+            background: linear-gradient(180deg, var(--blue), var(--blue-dark));
+            color: #fff; font-family: inherit; font-size: 14px; font-weight: 900;
+            text-transform: uppercase; cursor: pointer; padding: 12px;
+            box-shadow: 0 4px 0 rgba(0,0,0,.5); text-shadow: 2px 2px 0 #000;
+            transition: transform 0.1s; width: 100%;
+        }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.5); }
+        .btn-green { background: linear-gradient(180deg, var(--green), var(--green-dark)); }
+        .btn-red { background: linear-gradient(180deg, var(--red), var(--red-dark)); }
+
+        /* --- 4. UI LOADING SCREEN (AAA) --- */
         #loader-wrapper {
             position: relative;
             z-index: 10;
             width: 100%;
             height: 100%;
-            display: flex;
+            display: none; /* Disembunyikan saat login muncul */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -73,7 +112,6 @@
             transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s ease;
         }
 
-        /* Animasi masuk awal dan efek mengambang (floating) */
         .logo-container {
             width: 400px;
             max-width: 85vw;
@@ -107,11 +145,9 @@
             background: linear-gradient(90deg, var(--gold-dark), var(--gold), #fff, var(--gold));
             background-size: 200% 100%;
             border-radius: 6px;
-            /* Efek kilauan (Shimmer effect) di dalam bar */
             animation: shimmer 2s linear infinite;
         }
 
-        /* Teks Status dan Persentase */
         .loading-info {
             display: flex;
             justify-content: space-between;
@@ -126,58 +162,74 @@
             animation: fadeIn 1s ease 0.5s both;
         }
 
-        /* --- 4. KEYFRAMES ANIMASI --- */
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes shimmer {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
-        }
+        /* --- 5. KEYFRAMES ANIMASI & TRANSISI --- */
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
-        /* Kelas untuk menyembunyikan loader secara halus */
         .fade-out {
             opacity: 0 !important;
             transform: scale(1.05);
             pointer-events: none;
         }
 
-        /* --- 5. IFRAME UTAMA --- */
+        /* --- 6. IFRAME UTAMA --- */
         #game-frame {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            z-index: 5;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: none; z-index: 5;
             opacity: 0; /* Mulai transparan */
-            transition: opacity 1s ease-in; /* Fade in secara halus */
+            transition: opacity 1s ease-in; /* Fade in halus */
+            display: none;
         }
         
         .fade-in {
+            display: block !important;
             opacity: 1 !important;
         }
     </style>
 </head>
 <body>
 
-    <!-- Latar Belakang Terpisah agar bisa dipudarkan -->
+    <!-- Latar Belakang Terpisah (Bisa dipudarkan) -->
     <div id="bg-container"></div>
 
-    <!-- Layar Loading Utama -->
+    <!-- Tampilan Login (Dari Index 1) -->
+    <div id="auth-wrapper">
+        <div class="popup-box">
+            <div class="popup-title" id="authTitle">LOGIN AKUN</div>
+            <form id="authForm" onsubmit="handleAuthSubmit(event)">
+                <div class="form-group" id="usernameGroup" style="display:none;">
+                    <label>Username</label>
+                    <input type="text" id="authUsername" class="form-control" placeholder="Masukkan username unik">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" class="form-control" required placeholder="nama@email.com">
+                </div>
+                <div class="form-group" id="ageGroup" style="display:none;">
+                    <label>Umur (10 - 79 tahun)</label>
+                    <input type="number" id="authAge" class="form-control" min="10" max="79" placeholder="Minimal 10 tahun">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="authPassword" class="form-control" required placeholder="******">
+                </div>
+                <button type="submit" class="btn btn-green" style="margin-top: 10px;" id="authSubmitBtn">MASUK</button>
+            </form>
+            <div style="text-align:center; margin-top:8px;">
+                <a href="#" id="toggleAuthModeBtn" onclick="toggleAuthMode(); return false;" style="color:var(--gold); font-size:12px; text-decoration:none;">Belum punya akun? Daftar di sini</a>
+            </div>
+            <!-- Mode Tamu -->
+            <button class="btn" style="margin-top: 10px;" onclick="playAsGuest()">MAIN SEBAGAI TAMU</button>
+            <div id="authErrorMsg" style="color: var(--red); font-size: 12px; font-weight: bold; text-align: center; margin-top: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- Tampilan Loading (Dari Index 2) -->
     <div id="loader-wrapper">
         <div class="logo-container"></div>
-        
         <div class="loading-wrapper">
             <div class="loading-info">
                 <span id="loading-text">Menghubungkan...</span>
@@ -190,20 +242,131 @@
     </div>
 
     <!-- Iframe Game Utama -->
-    <iframe id="game-frame" src="about:blank"></iframe>
+    <iframe id="game-frame" src=""></iframe>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const loadingDuration = 3000; // Durasi emas (3 Detik)
+    <script type="module">
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-lRvFDWFceXE1lloWeAP732uohRe7iLo",
+            authDomain: "ambademo.firebaseapp.com",
+            projectId: "ambademo",
+            storageBucket: "ambademo.firebasestorage.app",
+            messagingSenderId: "346919760984",
+            appId: "1:346919760984:web:c9b102656aa020f3f2062d"
+        };
+
+        let auth, db;
+        let authMode = 'login';
+        let appLoaded = false;
+        const loadingDuration = 3000; // Durasi emas loading (3 detik)
+
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+            const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+            const { getFirestore, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
             
-            const progressBar = document.getElementById('progress-bar');
-            const percentText = document.getElementById('loading-percent');
-            const statusText = document.getElementById('loading-text');
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            window.signOutMethod = signOut;
+
+            onAuthStateChanged(auth, (user) => {
+                if (user && !appLoaded) {
+                    appLoaded = true;
+                    startLoadingSequence();
+                }
+            });
+            
+            window.registerUserFB = async (email, password, username, age) => {
+                const res = await createUserWithEmailAndPassword(auth, email, password);
+                const initialData = { uid: res.user.uid, username: username, email: email, age: parseInt(age), coins: 1000, wins: 0, losses: 0, items: { antidead: 0, stalestill: 0, glidesteps: 0 }, isOnline: true };
+                await setDoc(doc(db, "users", res.user.uid), initialData);
+            };
+            
+            window.loginUserFB = async (email, password) => {
+                await signInWithEmailAndPassword(auth, email, password);
+            };
+
+        } catch(err) {
+            console.warn("Firebase Init Error:", err);
+            document.getElementById('authErrorMsg').innerText = "Koneksi Firebase gagal. Gunakan Mode Tamu.";
+        }
+
+        // Fungsi Toggle Auth Mode
+        window.toggleAuthMode = function() {
+            authMode = authMode === 'login' ? 'register' : 'login';
+            document.getElementById('authForm').reset();
+            document.getElementById('authTitle').innerText = authMode === 'login' ? 'LOGIN AKUN' : 'DAFTAR AKUN BARU';
+            document.getElementById('usernameGroup').style.display = authMode === 'login' ? 'none' : 'flex';
+            document.getElementById('ageGroup').style.display = authMode === 'login' ? 'none' : 'flex';
+            document.getElementById('authSubmitBtn').innerText = authMode === 'login' ? 'MASUK' : 'DAFTAR SEKARANG';
+            document.getElementById('toggleAuthModeBtn').innerText = authMode === 'login' ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login di sini';
+            document.getElementById('authErrorMsg').innerText = "";
+        };
+
+        // Fungsi Submit Form
+        window.handleAuthSubmit = async function(e) {
+            e.preventDefault();
+            document.getElementById('authErrorMsg').innerText = "";
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const username = document.getElementById('authUsername').value;
+            const age = parseInt(document.getElementById('authAge').value);
+            const btn = document.getElementById('authSubmitBtn');
+            
+            if (authMode === 'register' && (!username || isNaN(age) || age < 10 || age > 79)) {
+                document.getElementById('authErrorMsg').innerText = "Mohon isi username dan umur (10-79) dengan benar.";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "MEMPROSES...";
+            try {
+                if (authMode === 'register') {
+                    await window.registerUserFB(email, password, username, age);
+                } else {
+                    await window.loginUserFB(email, password);
+                }
+            } catch (err) {
+                document.getElementById('authErrorMsg').innerText = err.message;
+                btn.disabled = false;
+                btn.innerText = authMode === 'login' ? 'MASUK' : 'DAFTAR SEKARANG';
+            }
+        };
+
+        // Fungsi Bermain Sebagai Tamu
+        window.playAsGuest = function() {
+            if(!appLoaded) {
+                appLoaded = true;
+                startLoadingSequence();
+            }
+        };
+
+        // Fungsi Menggabungkan Loading AAA
+        function startLoadingSequence() {
+            // Sembunyikan UI Auth
+            document.getElementById('auth-wrapper').style.display = 'none';
+            
+            // Siapkan UI Loading dan Latar Belakang (Reset jika sebelumnya log out)
             const loaderWrapper = document.getElementById('loader-wrapper');
             const bgContainer = document.getElementById('bg-container');
             const iframe = document.getElementById('game-frame');
 
-            // Array teks status yang disesuaikan dengan durasi 3 detik
+            loaderWrapper.classList.remove('fade-out');
+            loaderWrapper.style.display = 'flex';
+            loaderWrapper.style.opacity = '1';
+            
+            bgContainer.style.display = 'block';
+            bgContainer.style.opacity = '1';
+
+            // Muat Iframe di latar belakang
+            iframe.src = "mainmenu.html";
+
+            const progressBar = document.getElementById('progress-bar');
+            const percentText = document.getElementById('loading-percent');
+            const statusText = document.getElementById('loading-text');
+
             const statusMessages = [
                 "Menginisialisasi Mesin...", 
                 "Memuat Lanskap...", 
@@ -213,31 +376,19 @@
                 "Siap Dimainkan!"
             ];
 
-            // Mulai memuat iframe di latar belakang
-            iframe.src = "mainmenu.html";
-
-            // Logika Counter Persentase dengan Efek Realistis (Micro-Stutter/Ease-Out)
             let startTime = null;
 
             function updateProgress(currentTime) {
                 if (!startTime) startTime = currentTime;
                 const elapsed = currentTime - startTime;
                 
-                // Waktu berjalan dari 0.0 ke 1.0
                 let t = Math.min(elapsed / loadingDuration, 1);
-                
-                // Menerapkan fungsi Ease-Out (Cepat di awal 70%, melambat di akhir)
-                // Rumus cubic ease-out: 1 - (1 - t)^3
                 let easeOutProgress = 1 - Math.pow(1 - t, 3);
-                
-                // Kalkulasi persentase (0 hingga 100)
                 let progress = Math.min(easeOutProgress * 100, 100);
                 
-                // Update Lebar Bar & Teks Persentase
                 progressBar.style.width = `${progress}%`;
                 percentText.innerText = `${Math.floor(progress)}%`;
 
-                // Update Teks Status Dinamis berdasarkan progres saat ini
                 const messageIndex = Math.min(
                     Math.floor((progress / 100) * statusMessages.length), 
                     statusMessages.length - 1
@@ -245,30 +396,47 @@
                 statusText.innerText = statusMessages[messageIndex];
 
                 if (progress < 100) {
-                    requestAnimationFrame(updateProgress); // Lanjutkan loop animasi
+                    requestAnimationFrame(updateProgress);
                 } else {
-                    // Beri jeda kecil agar angka 100% sempat terbaca sebelum transisi
-                    setTimeout(transitionToGame, 300);
+                    // Transisi setelah loading selesai
+                    setTimeout(() => {
+                        loaderWrapper.classList.add('fade-out');
+                        bgContainer.style.opacity = '0';
+                        iframe.classList.add('fade-in');
+                        
+                        setTimeout(() => {
+                            loaderWrapper.style.display = 'none';
+                            bgContainer.style.display = 'none';
+                        }, 1000); 
+                    }, 300);
                 }
             }
-
-            // Jalankan animasi JS
+            // Jalankan animasi loading
             requestAnimationFrame(updateProgress);
+        }
 
-            // Fungsi Transisi Halus
-            function transitionToGame() {
-                // Fade out UI dan Background
-                loaderWrapper.classList.add('fade-out');
-                bgContainer.style.opacity = '0';
-
-                // Fade in Iframe Game
-                iframe.classList.add('fade-in');
-
-                // Bersihkan DOM dari memori setelah transisi CSS selesai (1 detik)
-                setTimeout(() => {
-                    loaderWrapper.style.display = 'none';
-                    bgContainer.style.display = 'none';
-                }, 1000); 
+        // Listener Logout dari dalam Iframe
+        window.addEventListener('message', async (event) => {
+            if (event.data === 'DO_LOGOUT') {
+                if (window.signOutMethod && auth && auth.currentUser) {
+                    await window.signOutMethod(auth);
+                }
+                appLoaded = false;
+                
+                // Reset Iframe
+                const iframe = document.getElementById('game-frame');
+                iframe.src = '';
+                iframe.classList.remove('fade-in');
+                
+                // Munculkan kembali background & UI Auth
+                document.getElementById('bg-container').style.display = 'block';
+                document.getElementById('bg-container').style.opacity = '1';
+                document.getElementById('auth-wrapper').style.display = 'flex';
+                
+                // Reset form state
+                const btn = document.getElementById('authSubmitBtn');
+                btn.disabled = false;
+                btn.innerText = authMode === 'login' ? 'MASUK' : 'DAFTAR SEKARANG';
             }
         });
     </script>

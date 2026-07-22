@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TileTether - Main Menu</title>
+  <title>TileTether - Main Menu UI</title>
   <style>
     :root {
       --gold: #ffd700; --gold-dark: #d4af37;
@@ -35,7 +35,7 @@
     .coin-icon { width: 18px; height: 18px; image-rendering: pixelated; object-fit: contain; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.35)); }
     @keyframes floatLogo { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
     .menu-shell { flex: 1; display: flex; align-items: flex-start; justify-content: center; position: relative; z-index: 3; padding: 4vh 0 16px 0; overflow-y: auto; }
-    .menu-stack { width: min(100%, 360px); display: flex; flex-direction: column; gap: 8px; }
+    .menu-stack { width: min(100%, 360px); display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
     .menu-logo { width: 100%; aspect-ratio: 6 / 1; object-fit: contain; align-self: center; margin-bottom: 8px; filter: drop-shadow(3px 3px 0 #000) drop-shadow(0 0 12px rgba(255,215,0,.3)); animation: floatLogo 2.8s ease-in-out infinite; }
     .menu-entry { width: 100%; border: 3px solid var(--gold); outline: 3px solid var(--brown-dark); background: linear-gradient(180deg, var(--brown), var(--brown-dark)); color: #fff; box-shadow: var(--shadow); padding: 8px 12px; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: flex-start; gap: 12px; position: relative; overflow: hidden; }
     .menu-entry::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 8px, rgba(255,255,255,0) 8px 16px); pointer-events: none; }
@@ -54,36 +54,48 @@
     .dock-avatar { position: relative; height: 80px; display: flex; align-items: flex-end; justify-content: center; gap: 6px; background-color: rgba(0,0,0,0.6); background-size: cover; background-position: center; border: 2px solid rgba(255,215,0,0.2); overflow: hidden; border-radius: 4px; padding-bottom: 5px; }
     .dock-avatar img { height: 70px; width: auto; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.6)); }
     .dock-name { text-align: center; font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; text-shadow: 2px 2px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; }
+    .status-online { background: #4caf50; box-shadow: 0 0 6px #4caf50; animation: pulse 1.5s infinite; }
+    .status-offline { background: #777; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
     .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); backdrop-filter: blur(3px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 12px; }
     .popup-box { position: relative; width: 100%; max-width: 410px; max-height: 88vh; display: flex; flex-direction: column; gap: 10px; padding: 16px; background: linear-gradient(180deg, var(--brown), var(--brown-dark)); border: 4px solid var(--gold); outline: 4px solid #000; box-shadow: var(--shadow); overflow-y: auto; animation: popOpen 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes popOpen { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .popup-title { font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); text-shadow: 2px 2px 0 #000; text-align: center; border-bottom: 2px dashed rgba(255,215,0,.3); padding-bottom: 8px; }
+    
     .btn { position: relative; border: 3px solid var(--gold); outline: 3px solid #000; background: linear-gradient(180deg, var(--blue), var(--blue-dark)); color: #fff; font-family: inherit; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; padding: 10px 12px; box-shadow: 0 4px 0 rgba(0,0,0,.5); text-shadow: 2px 2px 0 #000; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, box-shadow 0.1s; }
     .btn:hover { filter: brightness(1.1); border-color: #fff; transform: translateY(-2px); }
     .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.5); }
     .btn-green { background: linear-gradient(180deg, var(--green), var(--green-dark)); }
     .btn-red { background: linear-gradient(180deg, var(--red), var(--red-dark)); }
+    .btn-gold { background: linear-gradient(180deg, var(--gold-dark), #996515); border-color: #fff; }
+
     .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
     .form-group label { font-size: 11px; font-weight: 900; color: var(--gold); text-shadow: 1px 1px 0 #000; text-transform: uppercase; }
     .form-control { background: #000; border: 2px solid var(--gold); padding: 8px; color: #fff; font-family: inherit; font-size: 13px; outline: none; }
     .form-control:focus { border-color: #fff; }
+    
     .player-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px; }
-    .player-card { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); border: 2px solid var(--gold); padding: 8px; }
-    .player-info { display: flex; flex-direction: column; gap: 2px; }
-    .player-name { font-weight: 900; font-size: 12px; color: #fff; }
-    .player-stats { font-size: 9px; color: var(--gold); }
-    .status-badge { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; }
-    .status-online { background: #4caf50; box-shadow: 0 0 6px #4caf50; }
-    .status-offline { background: #777; }
+    .player-card { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); border: 2px solid var(--gold); padding: 8px; border-radius: 4px; }
+    .player-info { display: flex; flex-direction: column; gap: 4px; }
+    .player-name { font-weight: 900; font-size: 13px; color: #fff; text-shadow: 1px 1px 0 #000; display: flex; align-items: center; gap: 6px; }
+    .player-stats { font-size: 10px; color: var(--gold); font-weight: bold; }
+    
+    .rank-badge { background: var(--blue-dark); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 9px; border: 1px solid var(--gold); }
+
     .roller-stage { position: relative; width: 100%; height: 140px; display: flex; align-items: center; justify-content: center; perspective: 900px; margin: 4px 0; cursor: grab; touch-action: pan-y; }
     .roller-card { position: absolute; width: 90px; height: 100px; padding: 6px; background: linear-gradient(180deg, #d2b48c, #8b4513); border: 3px solid #000; outline: 2px solid rgba(255,255,255,.2); box-shadow: 0 5px 0 rgba(0,0,0,.5); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: transform .25s ease, opacity .25s ease, filter .2s ease; overflow: hidden; }
     .roller-card img { width: 45px; height: 45px; object-fit: contain; image-rendering: pixelated; pointer-events: none; filter: drop-shadow(2px 3px 0 rgba(0,0,0,.4)); }
     .roller-card .item-name { width: 100%; font-size: 9px; font-weight: 900; color: #fff; text-shadow: 1px 1px 0 #000; text-transform: uppercase; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .shop-section { border: 3px solid var(--gold); padding: 10px; background: rgba(0,0,0,.3); margin-bottom: 8px; }
+    
+    .shop-section { border: 3px solid var(--gold); padding: 10px; background: rgba(0,0,0,.4); margin-bottom: 8px; border-radius: 4px; }
     .shop-section-title { font-weight: 900; font-size: 12px; color: #fff; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid var(--gold); text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 0 #000; text-align: center; background: var(--brown-dark); }
     .shop-item-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px dashed rgba(255,215,0,.3); padding: 8px 0; }
+    .shop-item-row:last-child { border-bottom: none; }
     .shop-item-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-    .shop-item-icon { width: 36px; height: 36px; background: rgba(0,0,0,.5); border: 2px solid var(--gold); image-rendering: pixelated; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+    .shop-item-icon { width: 36px; height: 36px; background: rgba(0,0,0,.5); border: 2px solid var(--gold); image-rendering: pixelated; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border-radius: 4px; }
     .shop-item-icon img { width: 85%; height: 85%; object-fit: contain; }
     .shop-btn { padding: 6px 8px; font-size: 10px; flex-shrink: 0; }
     .btn-inline { width: 100%; }
@@ -92,6 +104,13 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; border: 1px solid #000; }
+
+    /* Profile Specific Styles */
+    .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.5); border: 2px solid var(--gold); border-radius: 8px; }
+    .profile-avatar-box { width: 70px; height: 70px; background: #000; border: 2px solid var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .profile-avatar-box img { height: 60px; object-fit: contain; image-rendering: pixelated; }
+    .profile-info-box { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .profile-rank-title { font-size: 14px; font-weight: 900; color: var(--gold); text-shadow: 1px 1px 0 #000; }
   </style>
 </head>
 <body>
@@ -119,16 +138,22 @@
             <div class="left"><div class="title">Toko</div><div class="desc">Beli item bantuan</div></div>
             <div class="right">🛒</div>
           </button>
+          <!-- FITUR BARU: Hadiah Harian -->
+          <button class="menu-entry" onclick="claimDailyReward()">
+            <div class="left"><div class="title">Hadiah Harian</div><div class="desc">Klaim koin gratis hari ini</div></div>
+            <div class="right">🎁</div>
+          </button>
+          <!-- FITUR BARU: Papan Peringkat -->
+          <button class="menu-entry" onclick="openLeaderboard()">
+            <div class="left"><div class="title">Papan Peringkat</div><div class="desc">Lihat pemain terbaik global</div></div>
+            <div class="right">🏆</div>
+          </button>
           <button class="menu-entry" onclick="launchCommunity()">
             <div class="left"><div class="title">Komunitas</div><div class="desc">Hubungi Dev & User Lain</div></div>
             <div class="right">💬</div>
           </button>
-          <button class="menu-entry" id="authBtn" onclick="openAuthModal('login')">
-            <div class="left"><div class="title" id="authBtnTitle">LOGIN / DAFTAR</div><div class="desc" id="authBtnDesc">Simpan Data Ke Cloud</div></div>
-            <div class="right">🔑</div>
-          </button>
-          <button class="menu-entry" id="profBtn" style="display:none;" onclick="openProfileModal()">
-            <div class="left"><div class="title">Profil Saya</div><div class="desc">Lihat & Edit Profil</div></div>
+          <button class="menu-entry" id="profBtn" onclick="openProfileModal()">
+            <div class="left"><div class="title">Profil Saya</div><div class="desc">Lihat & Edit Profil / Logout</div></div>
             <div class="right">👤</div>
           </button>
         </div>
@@ -136,7 +161,11 @@
     </main>
 
     <aside class="character-dock" onclick="openCharModal()">
-      <div class="dock-top"><div class="dock-title">Pemain</div></div>
+      <div class="dock-top">
+        <div class="dock-title">Pemain</div>
+        <!-- INDIKATOR ONLINE MILIK SENDIRI -->
+        <div id="myConnectionStatus" class="status-indicator status-offline" title="Offline Mode"></div>
+      </div>
       <div class="dock-avatar" id="dockAvatar">
         <img src="characters/bob/idle_1.png" id="mainCharImg" onerror="this.style.display='none'">
       </div>
@@ -144,45 +173,28 @@
     </aside>
 
     <!-- Modals -->
-    <div class="popup-overlay" id="authModal">
-      <div class="popup-box">
-        <div class="popup-title" id="authTitle">LOGIN</div>
-        <form id="authForm" onsubmit="handleAuthSubmit(event)">
-          <div class="form-group" id="usernameGroup" style="display:none;">
-            <label>Username</label>
-            <input type="text" id="authUsername" class="form-control" placeholder="Masukkan username unik">
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="authEmail" class="form-control" required placeholder="nama@email.com">
-          </div>
-          <div class="form-group" id="ageGroup" style="display:none;">
-            <label>Umur (10 - 79 tahun)</label>
-            <input type="number" id="authAge" class="form-control" min="10" max="79" placeholder="Minimal 10 tahun">
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="authPassword" class="form-control" required placeholder="******">
-          </div>
-          <button type="submit" class="btn btn-green btn-inline" style="margin-top: 10px;" id="authSubmitBtn">MASUK</button>
-        </form>
-        <div style="text-align:center; margin-top:8px;">
-          <a href="#" id="toggleAuthModeBtn" onclick="toggleAuthMode(); return false;" style="color:var(--gold); font-size:11px;">Belum punya akun? Daftar di sini</a>
-        </div>
-        <button class="btn btn-red btn-inline" onclick="closeModal('authModal')">BATAL</button>
-      </div>
-    </div>
-
+    <!-- PROFILE VIEWER DIPERBAIKI -->
     <div class="popup-overlay" id="profileModal">
       <div class="popup-box">
         <div class="popup-title">PROFIL PEMAIN</div>
+        
+        <div class="profile-header">
+          <div class="profile-avatar-box">
+            <img src="" id="profHeroImg" onerror="this.style.display='none'">
+          </div>
+          <div class="profile-info-box">
+            <div class="profile-rank-title" id="profRankTitle">ROOKIE</div>
+            <div style="font-size:10px; color:#ddd; font-weight:bold;">Status Koneksi: <span id="profConnText" style="color:var(--red);">Offline</span></div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label>Username</label>
           <input type="text" id="profUsername" class="form-control">
         </div>
         <div class="form-group">
           <label>Email (Permanen)</label>
-          <input type="text" id="profEmail" class="form-control" disabled style="opacity:0.6;">
+          <input type="text" id="profEmail" class="form-control" disabled style="opacity:0.6; cursor:not-allowed;">
         </div>
         <div class="form-group">
           <label>Umur (10-79)</label>
@@ -190,16 +202,25 @@
         </div>
         <div class="shop-section" style="margin-top:6px;">
           <div class="shop-section-title">STATISTIK PERMAINAN</div>
-          <div style="font-size:11px; display:flex; flex-direction:column; gap:4px;">
-            <div>🪙 Koin: <span id="profCoins" style="color:var(--gold); font-weight:bold;">0</span></div>
+          <div style="font-size:11px; display:flex; flex-direction:column; gap:6px;">
+            <div>🪙 Total Koin: <span id="profCoins" style="color:var(--gold); font-weight:bold; font-size:13px;">0</span></div>
             <div>🏆 Menang: <span id="profWins" style="color:var(--green); font-weight:bold;">0</span> Kali</div>
             <div>💀 Kalah: <span id="profLosses" style="color:var(--red); font-weight:bold;">0</span> Kali</div>
-            <div>🎒 Total Item Bantuan: <span id="profItems" style="color:#fff; font-weight:bold;">0</span> Item</div>
+            <div>🎒 Item Terkumpul: <span id="profItems" style="color:#fff; font-weight:bold;">0</span> Item</div>
           </div>
         </div>
         <button class="btn btn-green btn-inline" onclick="saveProfileChanges()">SIMPAN PERUBAHAN</button>
         <button class="btn btn-red btn-inline" onclick="logoutUser()">LOGOUT</button>
         <button class="btn btn-blue btn-inline" onclick="closeModal('profileModal')">TUTUP</button>
+      </div>
+    </div>
+
+    <!-- MODAL PAPAN PERINGKAT -->
+    <div class="popup-overlay" id="leaderboardModal">
+      <div class="popup-box">
+        <div class="popup-title">10 PEMAIN TERBAIK</div>
+        <div class="player-list" id="leaderboardContainer"></div>
+        <button class="btn btn-blue btn-inline" onclick="closeModal('leaderboardModal')">TUTUP</button>
       </div>
     </div>
 
@@ -214,12 +235,12 @@
     <div class="popup-overlay" id="challengeModal">
       <div class="popup-box">
         <div class="popup-title">TANTANG PEMAIN</div>
-        <div style="text-align:center; font-size:12px;" id="challengeTargetText">Tantang User</div>
-        <div class="form-group">
+        <div style="text-align:center; font-size:12px; font-weight:bold; color:var(--gold);" id="challengeTargetText">Tantang User</div>
+        <div class="form-group" style="margin-top: 10px;">
           <label>Jumlah Taruhan Koin (Min 100)</label>
           <input type="number" id="challengeBetAmount" class="form-control" value="100" min="100">
         </div>
-        <button class="btn btn-green btn-inline" onclick="sendChallenge()">KIRIM TANTANGAN</button>
+        <button class="btn btn-green btn-inline" style="margin-top: 10px;" onclick="sendChallenge()">KIRIM TANTANGAN</button>
         <button class="btn btn-red btn-inline" onclick="closeModal('challengeModal')">BATAL</button>
       </div>
     </div>
@@ -259,7 +280,7 @@
 
     <div class="popup-overlay" id="shopModal">
       <div class="popup-box">
-        <div class="popup-title">Toko</div>
+        <div class="popup-title">Toko Bantuan</div>
         <div class="coin-display" id="shopCoinDisplay" style="margin: 0 auto 10px auto; justify-content:center;">COINS: 0</div>
         <div id="shopContent" class="modal-stack"></div>
         <button class="btn btn-red btn-inline" onclick="closeShop()">Tutup</button>
@@ -286,18 +307,23 @@
       messagingSenderId: "346919760984",
       appId: "1:346919760984:web:c9b102656aa020f3f2062d"
     };
+
     try {
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
-      const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-      const { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, getDocs, query, where, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+      const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+      const { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, getDocs, query, where, setDoc, orderBy, limit } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+      
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
-      window.fbAuth = auth; window.fbDb = db; window.fbUpdateDoc = updateDoc; window.fbDoc = doc; window.fbDeleteDoc = deleteDoc; window.isFirebaseReady = true;
+      window.fbAuth = auth; window.fbDb = db; window.fbUpdateDoc = updateDoc; window.fbDoc = doc; window.isFirebaseReady = true;
 
       onAuthStateChanged(auth, async (user) => {
+        const connIndicator = document.getElementById('myConnectionStatus');
         if (user) {
           window.currentUser = user;
+          connIndicator.className = 'status-indicator status-online';
+          connIndicator.title = 'Online Connected';
           try {
             await updateDoc(doc(db, "users", user.uid), { isOnline: true });
             onSnapshot(doc(db, "users", user.uid), (docSnap) => {
@@ -305,30 +331,14 @@
             });
             listenForChallenges(user.uid);
           } catch(e) { console.warn("Firestore error:", e); }
-          document.getElementById('authBtn').style.display = 'none';
-          document.getElementById('profBtn').style.display = 'flex';
           document.getElementById('dockCharName').innerText = (window.userData && window.userData.username) ? window.userData.username.toUpperCase() : "PLAYER";
         } else {
           window.currentUser = null;
-          document.getElementById('authBtn').style.display = 'flex';
-          document.getElementById('profBtn').style.display = 'none';
+          connIndicator.className = 'status-indicator status-offline';
+          connIndicator.title = 'Offline Mode';
           document.getElementById('dockCharName').innerText = "GUEST";
         }
       });
-      
-      window.registerUserFB = async (email, password, username, age) => {
-        const res = await createUserWithEmailAndPassword(auth, email, password);
-        const initialData = { uid: res.user.uid, username: username, email: email, age: parseInt(age), coins: window.userData.coins || 1000, wins: window.userData.wins || 0, losses: window.userData.losses || 0, items: window.userData.items || { antidead: 0, stalestill: 0, glidesteps: 0 }, isOnline: true, selectedChar: menuState.p1Char, selectedPath: menuState.pathTheme };
-        await setDoc(doc(db, "users", res.user.uid), initialData);
-        window.userData = initialData; window.syncUserDataToLocal();
-      };
-      
-      window.loginUserFB = async (email, password) => { await signInWithEmailAndPassword(auth, email, password); };
-      
-      window.logoutUserFB = async () => {
-        if(window.currentUser) { try { await updateDoc(doc(db, "users", window.currentUser.uid), { isOnline: false }); } catch(e){} }
-        await signOut(auth);
-      };
       
       window.saveUserDataToCloud = async () => {
         if (!window.currentUser || !window.userData || !window.isFirebaseReady) return;
@@ -343,6 +353,16 @@
         const querySnapshot = await getDocs(q); let players = [];
         querySnapshot.forEach((docSnap) => { if(!window.currentUser || docSnap.id !== window.currentUser.uid) players.push(docSnap.data()); });
         return players;
+      };
+
+      // Tambahan Fungsi Leaderboard
+      window.loadLeaderboardCloud = async () => {
+        if(!window.isFirebaseReady) return [];
+        // Mengambil semua user (online maupun offline) diurutkan berdasarkan kemenangan
+        const q = query(collection(db, "users"));
+        const querySnapshot = await getDocs(q); let players = [];
+        querySnapshot.forEach((docSnap) => { players.push(docSnap.data()); });
+        return players.sort((a,b) => (b.wins || 0) - (a.wins || 0)).slice(0, 10);
       };
 
       let matchUnsubscribe = null;
@@ -388,6 +408,7 @@
       });
     } catch(err) { console.warn("Firebase Init Offline Fallback Active:", err); window.isFirebaseReady = false; }
   </script>
+  
   <script>
     const PATH_NAMES = { path_01: 'Default', path_02: 'Grass', path_03: 'Water', path_04: 'Abyss', path_05: 'Swamp', path_06: 'Winter', path_07: 'Trail', path_08: 'Clockwork', path_09: 'Blossom', path_10: 'Barren', path_11: 'Dungeon', path_12: 'Arcane', path_13: 'Palace', path_14: 'Void', path_15: 'Fungal', path_16: 'Ruins', path_17: 'Cyber' };
     const ITEM_METADATA = { antidead: { name: "Antidead", img: "items/antidead.png", max: 3 }, stalestill: { name: "Stalestill", img: "items/stalestill.png", max: 5 }, glidesteps: { name: "Glidesteps", img: "items/glidesteps.png", max: 10 } };
@@ -398,7 +419,6 @@
 
     let menuState = { p1Char: 'bob', pathTheme: 'path_01' };
     let rollerIdx = { path: 0, char: 0 };
-    let authMode = 'login';
     let currentChallengeTarget = null;
     
     function loadLocalSave() {
@@ -447,7 +467,9 @@
       currentIdleStep = (currentIdleStep + 1) % ANIM_FRAMES.length;
       let frame = ANIM_FRAMES[currentIdleStep];
       let mainImg = document.getElementById('mainCharImg');
+      let profImg = document.getElementById('profHeroImg');
       if (mainImg && menuState.p1Char) mainImg.src = `characters/${menuState.p1Char}/idle_${frame}.png`;
+      if (profImg && menuState.p1Char) profImg.src = `characters/${menuState.p1Char}/idle_${frame}.png`;
       document.querySelectorAll('#charRollerStage .roller-card img').forEach(img => {
         let charName = img.dataset.char; if (charName) img.src = `characters/${charName}/idle_${frame}.png`;
       });
@@ -456,35 +478,12 @@
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; updateDashboard(); }
     
-    function openAuthModal(mode) {
-      if (!window.isFirebaseReady) return showCustomAlert("OFFLINE", "Koneksi Firebase belum siap!");
-      authMode = mode;
-      document.getElementById('authForm').reset();
-      document.getElementById('authTitle').innerText = mode === 'login' ? 'LOGIN AKUN' : 'DAFTAR AKUN BARU';
-      document.getElementById('usernameGroup').style.display = mode === 'login' ? 'none' : 'flex';
-      document.getElementById('ageGroup').style.display = mode === 'login' ? 'none' : 'flex';
-      document.getElementById('authSubmitBtn').innerText = mode === 'login' ? 'MASUK' : 'DAFTAR SEKARANG';
-      document.getElementById('toggleAuthModeBtn').innerText = mode === 'login' ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login di sini';
-      openModal('authModal');
-    }
-    function toggleAuthMode() { openAuthModal(authMode === 'login' ? 'register' : 'login'); }
-    
-    async function handleAuthSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value, password = document.getElementById('authPassword').value;
-      const username = document.getElementById('authUsername').value, age = parseInt(document.getElementById('authAge').value);
-      const btn = document.getElementById('authSubmitBtn');
-      if (authMode === 'register') {
-        if (!username || username.trim() === "") return showCustomAlert("ERROR", "Username wajib diisi!");
-        if (isNaN(age) || age < 10 || age > 79) return showCustomAlert("ERROR", "Umur harus antara 10 hingga 79 tahun!");
-      }
-      const originalText = btn.innerText; btn.innerText = "MEMPROSES..."; btn.disabled = true;
-      try {
-        if (authMode === 'register') { await window.registerUserFB(email, password, username, age); showCustomAlert("BERHASIL", "Pendaftaran akun berhasil dan otomatis login!"); } 
-        else { await window.loginUserFB(email, password); showCustomAlert("BERHASIL", "Login berhasil!"); }
-        closeModal('authModal');
-      } catch (err) { showCustomAlert("GAGAL", err.message); } 
-      finally { btn.innerText = originalText; btn.disabled = false; }
+    function getRankTitle(wins) {
+      if(wins >= 100) return "MASTER";
+      if(wins >= 50) return "VETERAN";
+      if(wins >= 20) return "PRO";
+      if(wins >= 5) return "AMATEUR";
+      return "ROOKIE";
     }
 
     function openProfileModal() {
@@ -493,8 +492,17 @@
       document.getElementById('profEmail').value = window.userData.email || 'guest@offline';
       document.getElementById('profAge').value = window.userData.age || 10;
       document.getElementById('profCoins').innerText = window.userData.coins || 0;
-      document.getElementById('profWins').innerText = window.userData.wins || 0;
+      
+      const wins = window.userData.wins || 0;
+      document.getElementById('profWins').innerText = wins;
       document.getElementById('profLosses').innerText = window.userData.losses || 0;
+      document.getElementById('profRankTitle').innerText = getRankTitle(wins);
+      
+      const isOnline = document.getElementById('myConnectionStatus').classList.contains('status-online');
+      const connText = document.getElementById('profConnText');
+      connText.innerText = isOnline ? "Online Connected" : "Offline / Guest";
+      connText.style.color = isOnline ? "var(--green)" : "var(--red)";
+
       let totItems = 0; if (window.userData.items) Object.values(window.userData.items).forEach(v => totItems += v);
       document.getElementById('profItems').innerText = totItems;
       openModal('profileModal');
@@ -511,13 +519,15 @@
     }
     
     async function logoutUser() {
-      if(window.logoutUserFB) await window.logoutUserFB();
-      window.userData = { username: 'GUEST', coins: 0, wins: 0, losses: 0, items: { antidead: 0, stalestill: 0, glidesteps: 0 } };
-      closeModal('profileModal'); updateDashboard();
+      if(window.currentUser && window.isFirebaseReady) {
+        try { await window.fbUpdateDoc(window.fbDoc(window.fbDb, "users", window.currentUser.uid), { isOnline: false }); } catch(e){}
+      }
+      closeModal('profileModal');
+      window.parent.postMessage('DO_LOGOUT', '*');
     }
 
     async function openPlayersModal() {
-      if (!window.isFirebaseReady || !window.currentUser) return showCustomAlert("LOGIN DIPERLUKAN", "Silakan Login terlebih dahulu untuk bermain dan menantang pemain lain!", `<button class="btn btn-green btn-inline" onclick="closeModal('messageModal'); openAuthModal('login');">LOGIN</button><button class="btn btn-red btn-inline" onclick="closeModal('messageModal')">BATAL</button>`);
+      if (!window.isFirebaseReady || !window.currentUser) return showCustomAlert("LOGIN DIPERLUKAN", "Silakan Login terlebih dahulu untuk menantang pemain lain!");
       openModal('playersModal');
       const container = document.getElementById('playersListContainer'); container.innerHTML = '<div style="text-align:center; color:#fff;">Memuat daftar pemain...</div>';
       const players = await window.loadAllPlayersCloud(); container.innerHTML = '';
@@ -525,9 +535,57 @@
       players.forEach(p => {
         const card = document.createElement('div'); card.className = 'player-card';
         const safeName = document.createElement('div'); safeName.innerText = p.username || 'PLAYER';
-        card.innerHTML = `<div class="player-info"><div class="player-name">${safeName.innerHTML.toUpperCase()} <span class="status-badge ${p.isOnline ? 'status-online' : 'status-offline'}"></span></div><div class="player-stats">🪙 ${p.coins || 0} | 🏆 ${p.wins || 0}W ${p.losses || 0}L</div></div>${p.isOnline ? `<button class="btn btn-green shop-btn" onclick="openChallengeModal('${p.uid}', '${(p.username || '').replace(/'/g, "\\'")}', '${p.selectedChar || 'bob'}')">TANTANG</button>` : `<button class="btn shop-btn" disabled style="background:#555;">OFFLINE</button>`}`;
+        card.innerHTML = `<div class="player-info"><div class="player-name">${safeName.innerHTML.toUpperCase()} <span class="status-indicator ${p.isOnline ? 'status-online' : 'status-offline'}"></span></div><div class="player-stats">🪙 ${p.coins || 0} | 🏆 ${p.wins || 0}W ${p.losses || 0}L</div></div>${p.isOnline ? `<button class="btn btn-green shop-btn" onclick="openChallengeModal('${p.uid}', '${(p.username || '').replace(/'/g, "\\'")}', '${p.selectedChar || 'bob'}')">TANTANG</button>` : `<button class="btn shop-btn" disabled style="background:#555;">OFFLINE</button>`}`;
         container.appendChild(card);
       });
+    }
+
+    // LOGIKA PAPAN PERINGKAT
+    async function openLeaderboard() {
+      if (!window.isFirebaseReady) return showCustomAlert("OFFLINE", "Papan Peringkat membutuhkan koneksi internet.");
+      openModal('leaderboardModal');
+      const container = document.getElementById('leaderboardContainer'); 
+      container.innerHTML = '<div style="text-align:center; color:#fff;">Memuat peringkat...</div>';
+      
+      const players = await window.loadLeaderboardCloud(); container.innerHTML = '';
+      if (players.length === 0) return container.innerHTML = '<div style="text-align:center; color:#fff;">Data belum tersedia.</div>';
+      
+      players.forEach((p, index) => {
+        const card = document.createElement('div'); 
+        card.className = 'player-card';
+        const safeName = document.createElement('div'); safeName.innerText = p.username || 'PLAYER';
+        let medal = index === 0 ? "🥇 " : index === 1 ? "🥈 " : index === 2 ? "🥉 " : `#${index+1} `;
+        
+        card.innerHTML = `
+          <div class="player-info">
+            <div class="player-name" style="color: ${index < 3 ? 'var(--gold)' : '#fff'}">${medal}${safeName.innerHTML.toUpperCase()}</div>
+            <div class="player-stats">Pangkat: <span class="rank-badge">${getRankTitle(p.wins || 0)}</span></div>
+          </div>
+          <div style="text-align:right;">
+             <div style="font-size:12px; font-weight:bold; color:var(--green); text-shadow:1px 1px 0 #000;">${p.wins || 0} WIN</div>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    // LOGIKA HADIAH HARIAN
+    function claimDailyReward() {
+      const todayDate = new Date().toDateString();
+      const lastClaim = localStorage.getItem('tiletether_daily_claim');
+      
+      if(lastClaim === todayDate) {
+        showCustomAlert("GAGAL KLAIM", "Anda sudah mengambil Hadiah Harian untuk hari ini. Silakan kembali besok!");
+      } else {
+        const rewardAmount = 500;
+        totalCoins += rewardAmount;
+        localStorage.setItem('tiletether_daily_claim', todayDate);
+        window.userData.coins = totalCoins;
+        saveLocalData();
+        if(window.saveUserDataToCloud) window.saveUserDataToCloud();
+        
+        showCustomAlert("SELAMAT!", `Anda berhasil mengklaim ${rewardAmount} Koin gratis hari ini!`);
+        updateDashboard();
+      }
     }
 
     function openChallengeModal(uid, username, charName) {
@@ -633,7 +691,6 @@
     }
 
     function startSinglePlayerGame() {
-      if (!window.currentUser && window.isFirebaseReady) return showCustomAlert("LOGIN DIPERLUKAN", "Silakan login terlebih dahulu untuk bermain.", `<button class="btn btn-green btn-inline" onclick="closeModal('messageModal'); openAuthModal('login');">LOGIN</button><button class="btn btn-red btn-inline" onclick="closeModal('messageModal')">BATAL</button>`);
       window.location.href = "gameplay.html?mode=offline";
     }
 
