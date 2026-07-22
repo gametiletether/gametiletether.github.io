@@ -64,6 +64,81 @@
     .player-piece { position: absolute; width: calc(100% / var(--grid-size)); height: calc(100% / var(--grid-size)); display: flex; align-items: center; justify-content: center; transform: translate(calc(var(--px) * 100%), calc(var(--py) * 100%)); transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.5, 1); z-index: 50; opacity: 0; }
     .player-piece.visible { opacity: 1; }
     .player-piece img { width: 150%; height: 150%; object-fit: contain; image-rendering: pixelated; position: absolute; bottom: 10%; z-index: 10; }
+    
+    /* CHAT BUBBLE STYLES */
+    .chat-bubble {
+      position: absolute;
+      background: white;
+      color: black;
+      border: 2px solid #000;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-width: 120px;
+      min-width: 60px;
+      z-index: 200;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+      pointer-events: auto; /* Memungkinkan klik tombol tutup */
+      animation: popOpen 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .chat-bubble.right-side {
+      left: 110%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .chat-bubble.right-side::after {
+      content: ""; position: absolute; top: 50%; right: 100%; transform: translateY(-50%);
+      border-width: 6px; border-style: solid; border-color: transparent white transparent transparent;
+    }
+    .chat-bubble.right-side::before {
+      content: ""; position: absolute; top: 50%; right: 100%; transform: translateY(-50%);
+      border-width: 9px; border-style: solid; border-color: transparent #000 transparent transparent;
+      z-index: -1; margin-right: 2px;
+    }
+    .chat-bubble.left-side {
+      right: 110%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .chat-bubble.left-side::after {
+      content: ""; position: absolute; top: 50%; left: 100%; transform: translateY(-50%);
+      border-width: 6px; border-style: solid; border-color: transparent transparent transparent white;
+    }
+    .chat-bubble.left-side::before {
+      content: ""; position: absolute; top: 50%; left: 100%; transform: translateY(-50%);
+      border-width: 9px; border-style: solid; border-color: transparent transparent transparent #000;
+      z-index: -1; margin-left: 2px;
+    }
+    
+    .chat-close {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 22px;
+      height: 22px;
+      background: var(--red);
+      color: white;
+      border: 2px solid #000;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+      z-index: 201;
+      pointer-events: auto;
+    }
+    .chat-close:hover {
+      background: var(--red-dark);
+      transform: scale(1.1);
+    }
+
     .controller-area { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--brown); padding: 12px; border: 4px solid #000; box-shadow: 0 6px 0 rgba(0,0,0,.55); position: relative; }
     .status-text { display: block; position: absolute; top: -14px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: white; background: var(--brown-dark); padding: 3px 10px; border: 3px solid #000; text-align: center; box-shadow: 0 3px 0 rgba(0,0,0,.55); z-index: 10; white-space: nowrap; pointer-events: none; text-shadow: 2px 2px 0 #000; }
     @keyframes shake { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 20% { transform: translate(-3px, 1px) rotate(-1deg); } 40% { transform: translate(3px, -2px) rotate(1deg); } 60% { transform: translate(-3px, 2px) rotate(0deg); } 80% { transform: translate(2px, -1px) rotate(1deg); } }
@@ -102,6 +177,12 @@
         <span id="turnInfo" style="font-size: 11px; letter-spacing: 1px;">VS</span>
         <div class="header-side right">
           <span id="p2ScoreLabel" style="color: var(--gold);">AI</span>
+          
+          <!-- CHAT BUTTON -->
+          <button class="header-btn" style="background: var(--green);" onclick="openChat()" title="Chat">
+            <canvas id="iconChat" width="28" height="28"></canvas>
+          </button>
+          
           <button class="header-btn" style="background: var(--gold-dark);" onclick="openEquipment()" title="Equip Items">
             <canvas id="iconItems" width="28" height="28"></canvas>
           </button>
@@ -126,6 +207,18 @@
     </div>
     
     <!-- Modals -->
+    <!-- CHAT POPUP -->
+    <div class="popup-overlay" id="chatPopup">
+      <div class="popup-box" style="max-width: 320px;">
+        <div class="popup-title">Kirim Pesan</div>
+        <textarea id="chatInput" rows="3" placeholder="Ketik pesan..." style="width: 100%; resize: none; border: 3px solid #000; padding: 8px; font-family: inherit; font-size: 14px; font-weight: bold; color: black; outline: none;"></textarea>
+        <div class="popup-buttons" style="margin-top: 10px;">
+          <button class="btn btn-green btn-inline" onclick="sendChat()">Kirim</button>
+          <button class="btn btn-red btn-inline" onclick="closeChat()">Batal</button>
+        </div>
+      </div>
+    </div>
+    
     <div class="popup-overlay" id="equipmentModal">
       <div class="popup-box" style="max-width: 320px;">
         <div class="popup-title">ITEMS</div>
@@ -263,10 +356,89 @@
 
     function drawHeaderIcons() {
       const cMenu = document.getElementById('iconMenu').getContext('2d'); cMenu.imageSmoothingEnabled = false; cMenu.clearRect(0,0,28,28); cMenu.fillStyle = '#ffffff'; cMenu.beginPath(); cMenu.moveTo(14, 4); cMenu.lineTo(3, 14); cMenu.lineTo(25, 14); cMenu.closePath(); cMenu.fill(); cMenu.lineWidth = 2; cMenu.strokeStyle = '#000000'; cMenu.stroke(); cMenu.fillRect(6, 13, 16, 11); cMenu.strokeRect(6, 13, 16, 11); cMenu.fillStyle = '#000000'; cMenu.fillRect(11, 17, 6, 7);
+      
+      const cChat = document.getElementById('iconChat').getContext('2d');
+      cChat.imageSmoothingEnabled = false; cChat.clearRect(0,0,28,28);
+      cChat.fillStyle = '#ffffff';
+      cChat.beginPath(); 
+      if(cChat.roundRect) { cChat.roundRect(4,6,20,12,3); } else { cChat.rect(4,6,20,12); } 
+      cChat.fill();
+      cChat.lineWidth = 2; cChat.strokeStyle = '#000000'; cChat.stroke();
+      cChat.beginPath(); cChat.moveTo(8,18); cChat.lineTo(8,23); cChat.lineTo(13,18); cChat.fill(); cChat.stroke();
+      cChat.fillStyle = '#000000'; cChat.fillRect(8, 10, 12, 2); cChat.fillRect(8, 13, 8, 2);
+      
       const cItem = document.getElementById('iconItems').getContext('2d'); cItem.imageSmoothingEnabled = false; cItem.clearRect(0,0,28,28); cItem.fillStyle = '#ffd700'; cItem.fillRect(4, 9, 20, 15); cItem.lineWidth = 2; cItem.strokeStyle = '#000000'; cItem.strokeRect(4, 9, 20, 15); cItem.fillStyle = '#d4af37'; cItem.fillRect(6, 6, 16, 5); cItem.strokeRect(6, 6, 16, 5); cItem.fillStyle = '#ffffff'; cItem.fillRect(11, 13, 6, 6); cItem.strokeRect(11, 13, 6, 6);
+      
       const cRules = document.getElementById('iconRules').getContext('2d'); cRules.imageSmoothingEnabled = false; cRules.clearRect(0,0,28,28); cRules.fillStyle = '#ffffff'; cRules.font = 'bold 22px "Courier New", monospace'; cRules.textAlign = 'center'; cRules.textBaseline = 'middle'; cRules.lineWidth = 3; cRules.strokeStyle = '#000000'; cRules.strokeText('?', 14, 15); cRules.fillText('?', 14, 15);
     }
     drawHeaderIcons();
+
+    // FUNGSI CHAT
+    function openChat() { document.getElementById('chatPopup').style.display = 'flex'; document.getElementById('chatInput').focus(); }
+    function closeChat() { document.getElementById('chatPopup').style.display = 'none'; document.getElementById('chatInput').value = ''; }
+    
+    function displayChatBubble(pIdx, text) {
+      const node = el.pieceNodes[pIdx];
+      if(!node) return;
+      let existing = node.querySelector('.chat-bubble');
+      if(existing) existing.remove();
+      
+      const p = gameState.players[pIdx];
+      
+      const bubble = document.createElement('div');
+      
+      // Mengatur class agar balon tampil di samping kiri/kanan berdasarkan posisi karakter di grid
+      if (p && p.x !== null && p.x < (gameState.size / 2)) {
+          bubble.className = 'chat-bubble right-side';
+      } else {
+          bubble.className = 'chat-bubble left-side';
+      }
+      
+      // Set pesan teks tanpa mengubah isi innerHTML yang akan merusak text (jika pakai textContent/innerText lebih aman)
+      bubble.innerText = text;
+      
+      // Tombol silang untuk menutup
+      const closeBtn = document.createElement('div');
+      closeBtn.className = 'chat-close';
+      closeBtn.innerText = 'X';
+      
+      // Hindari bubbling event supaya tidak ke-klik parent board-nya
+      closeBtn.onclick = (e) => {
+          e.stopPropagation();
+          bubble.remove();
+      };
+      closeBtn.onpointerdown = (e) => {
+          e.stopPropagation();
+          bubble.remove();
+      };
+      
+      bubble.appendChild(closeBtn);
+      node.appendChild(bubble);
+      
+      // SetTimeout 4 detik telah dihapus agar balon tidak hilang otomatis
+    }
+    
+    async function sendChat() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if(!text) return;
+      
+      closeChat();
+      displayChatBubble(0, text);
+      
+      if(isOnlinePVP && window.isFirebaseReady && activeMatchId && window.currentUser) {
+        try {
+          await window.fbUpdateDoc(window.fbDoc(window.fbDb, "matches", activeMatchId), {
+            lastChat: { uid: window.currentUser.uid, text: text, ts: Date.now() }
+          });
+        } catch(e) { console.warn("Chat gagal dikirim", e); }
+      } else if (!isOnlinePVP) {
+        setTimeout(() => {
+           const aiReplies = ["Haha!", "Ayo lanjut!", "Hati-hati...", "Hmm, menarik."];
+           displayChatBubble(1, aiReplies[Math.floor(Math.random() * aiReplies.length)]);
+        }, 1500);
+      }
+    }
 
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
@@ -299,7 +471,7 @@
     }
 
     function bootGameplay(config) {
-        gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, p1Char: config.p1Char, pathTheme: config.pathTheme, startTime: 0, antideadActive: false, glidestepsActive: false, glidestepsCharges: 0, stalestillActive: false, stalestillCharges: 0, stalestillUsed: false };
+        gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, p1Char: config.p1Char, pathTheme: config.pathTheme, startTime: 0, antideadActive: false, glidestepsActive: false, glidestepsCharges: 0, stalestillActive: false, stalestillCharges: 0, stalestillUsed: false, lastChatTs: 0 };
         initGame();
         if(gameTickInterval) clearInterval(gameTickInterval);
         gameTickInterval = setInterval(gameLoopTick, 150);
@@ -307,7 +479,7 @@
 
     function bootOnlineGameplay(matchData, isChallenger) {
       if(!window.isFirebaseReady) { alert("Firebase disconnected."); exitToMenu(); return; }
-      gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, pathTheme: window.userData.selectedPath || 'path_01', startTime: Date.now(), isOnline: true, isChallenger: isChallenger, matchData: matchData, stalestillUsed: false };
+      gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, pathTheme: window.userData.selectedPath || 'path_01', startTime: Date.now(), isOnline: true, isChallenger: isChallenger, matchData: matchData, stalestillUsed: false, lastChatTs: 0 };
       const oppChar = isChallenger ? matchData.targetChar : matchData.challengerChar;
       gameState.players = [ { name: window.userData.selectedChar || 'bob', x: null, y: null, pose: 'idle', uid: window.currentUser ? window.currentUser.uid : 'guest' }, { name: oppChar || 'alice', x: null, y: null, pose: 'idle', uid: isChallenger ? matchData.targetUid : matchData.challengerUid } ];
       initGameOnline();
@@ -315,6 +487,13 @@
       gameTickInterval = setInterval(gameLoopTick, 150);
       
       matchListenerUnsub = window.listenOnlineMatchState(activeMatchId, (data) => {
+        if (data.lastChat && data.lastChat.ts > (gameState.lastChatTs || 0)) {
+           gameState.lastChatTs = data.lastChat.ts;
+           if (data.lastChat.uid !== window.currentUser.uid) {
+               displayChatBubble(1, data.lastChat.text);
+           }
+        }
+
         if (data.gameState) {
           let prevPhase = gameState.phase;
           gameState.phase = data.gameState.phase;
@@ -325,7 +504,6 @@
             unifiedAudio.play.play().catch(()=>{});
           }
 
-          // Mengecek trigger animasi dari event lawan (Sync Animation)
           if (data.gameState.itemAnim && data.gameState.itemAnim.ts > (gameState.lastItemEventTs || 0)) {
               gameState.lastItemEventTs = data.gameState.itemAnim.ts;
               let anim = data.gameState.itemAnim;
