@@ -254,8 +254,9 @@
     async function sendChat() {
       const input = document.getElementById('chatInput'); const text = input.value.trim(); if(!text) return;
       closeChat(); displayChatBubble(0, text);
-      if(isOnlinePVP && window.isFirebaseReady && activeMatchId && window.currentUser) {
-        try { await window.fbUpdateDoc(window.fbDoc(window.fbDb, "matches", activeMatchId), { lastChat: { uid: window.currentUser.uid, text: text, ts: Date.now() } }); } catch(e) { console.warn("Chat gagal", e); }
+      if(isOnlinePVP && window.isFirebaseReady && activeMatchId) {
+        const localUid = gameState.players[0].uid;
+        try { await window.fbUpdateDoc(window.fbDoc(window.fbDb, "matches", activeMatchId), { lastChat: { uid: localUid, text: text, ts: Date.now() } }); } catch(e) { console.warn("Chat gagal", e); }
       } else if (!isOnlinePVP) {
         setTimeout(() => { const aiReplies = ["Haha!", "Ayo lanjut!", "Hati-hati...", "Hmm, menarik."]; displayChatBubble(1, aiReplies[Math.floor(Math.random() * aiReplies.length)]); }, 1500);
       }
@@ -290,15 +291,25 @@
       if(!window.isFirebaseReady) { alert("Firebase disconnected."); exitToMenu(); return; }
       
       gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, pathTheme: window.userData.selectedPath || 'path_01', startTime: Date.now(), isOnline: true, isChallenger: isChallenger, matchData: matchData, stalestillUsed: false, lastChatTs: 0, lastSfxTs: 0, pendingSfx: null };
+      
+      const myUid = isChallenger ? matchData.challengerUid : matchData.targetUid;
+      const oppUid = isChallenger ? matchData.targetUid : matchData.challengerUid;
       const oppChar = isChallenger ? matchData.targetChar : matchData.challengerChar;
-      gameState.players = [ { name: window.userData.selectedChar || 'bob', x: null, y: null, pose: 'idle', uid: window.currentUser ? window.currentUser.uid : 'guest' }, { name: oppChar || 'alice', x: null, y: null, pose: 'idle', uid: isChallenger ? matchData.targetUid : matchData.challengerUid } ];
+      
+      gameState.players = [ 
+          { name: window.userData.selectedChar || 'bob', x: null, y: null, pose: 'idle', uid: myUid }, 
+          { name: oppChar || 'alice', x: null, y: null, pose: 'idle', uid: oppUid } 
+      ];
+      
       initGameOnline(); 
       if(gameTickInterval) clearInterval(gameTickInterval); gameTickInterval = setInterval(gameLoopTick, 150);
       
       matchListenerUnsub = window.listenOnlineMatchState(activeMatchId, (data) => {
+        const localUid = gameState.players[0].uid;
+        
         if (data.lastChat && data.lastChat.ts > (gameState.lastChatTs || 0)) {
            gameState.lastChatTs = data.lastChat.ts;
-           if (data.lastChat.uid !== window.currentUser.uid) displayChatBubble(1, data.lastChat.text);
+           if (data.lastChat.uid !== localUid) displayChatBubble(1, data.lastChat.text);
         }
         
         if (data.gameState) {
@@ -311,8 +322,8 @@
           let prevPhase = gameState.phase; 
           gameState.phase = data.gameState.phase; 
           
-          let currentTurnUid = data.currentTurnUid || (isChallenger ? window.currentUser.uid : matchData.challengerUid);
-          gameState.turn = (currentTurnUid === window.currentUser.uid) ? 0 : 1; 
+          let currentTurnUid = data.currentTurnUid || (isChallenger ? localUid : matchData.challengerUid);
+          gameState.turn = (currentTurnUid === localUid) ? 0 : 1; 
           gameState.burned = new Map(JSON.parse(data.gameState.burnedArr || "[]"));
           
           if (prevPhase !== 'play' && gameState.phase === 'play') unifiedAudio.play.play().catch(()=>{});
@@ -445,10 +456,10 @@
     
     async function syncOnlineMove(keepTurn = false) {
       if(!window.isFirebaseReady) return;
-const p1X = (gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x) ?? null;
-const p1Y = (gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y) ?? null;
-const p2X = (gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x) ?? null;
-const p2Y = (gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y) ?? null;
+      const p1X = (gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x) ?? null;
+      const p1Y = (gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y) ?? null;
+      const p2X = (gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x) ?? null;
+      const p2Y = (gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y) ?? null;
       
       let nextPhase = gameState.phase; 
       if (gameState.phase === 'place' && p1X !== null && p2X !== null && p1X !== undefined && p2X !== undefined) nextPhase = 'play';
@@ -459,7 +470,7 @@ const p2Y = (gameState.isChallenger ? gameState.players[1].y : gameState.players
       if (gameState.pendingSfx) { statePayload.lastSfx = gameState.pendingSfx; gameState.pendingSfx = null; }
       
       const opponentUid = gameState.players[1].uid; 
-      const nextTurnUid = keepTurn ? window.currentUser.uid : opponentUid;
+      const nextTurnUid = keepTurn ? gameState.players[0].uid : opponentUid;
       await window.updateOnlineGameStateCloud(activeMatchId, statePayload, nextTurnUid);
       
       if (getLegalMoves(0).length === 0 && gameState.phase === 'play') { 
@@ -469,7 +480,10 @@ const p2Y = (gameState.isChallenger ? gameState.players[1].y : gameState.players
     }
     
     async function handleOnlineGameFinished(winnerUid) {
-      gameState.phase = 'over'; const isWinner = window.currentUser && winnerUid === window.currentUser.uid; const bet = gameState.matchData.betCoin || 50;
+      gameState.phase = 'over'; 
+      const localUid = gameState.players[0].uid;
+      const isWinner = winnerUid === localUid; 
+      const bet = gameState.matchData.betCoin || 50;
       if (isWinner) { window.userData.coins += bet; window.userData.wins += 1; el.popupMsg.innerText = "YOU SURVIVE (MENANG!)"; el.popupCoinMsg.innerText = `+${bet} COINS`; el.popupImg.style.display = 'block'; unifiedAudio.win.play().catch(()=>{}); } 
       else { window.userData.coins = Math.max(0, window.userData.coins - bet); window.userData.losses += 1; el.popupMsg.innerText = "YOU DEAD (KALAH!)"; el.popupCoinMsg.innerText = `-${bet} COINS`; el.popupImg.style.display = 'none'; unifiedAudio.lose.play().catch(()=>{}); }
       saveLocalData(); syncUserDataToServer(); el.popup.style.display = 'flex';
