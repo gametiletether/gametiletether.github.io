@@ -445,8 +445,10 @@
     
     async function syncOnlineMove(keepTurn = false) {
       if(!window.isFirebaseReady) return;
-      const p1X = gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x, p1Y = gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y; 
-      const p2X = gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x, p2Y = gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y;
+const p1X = (gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x) ?? null;
+const p1Y = (gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y) ?? null;
+const p2X = (gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x) ?? null;
+const p2Y = (gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y) ?? null;
       
       let nextPhase = gameState.phase; 
       if (gameState.phase === 'place' && p1X !== null && p2X !== null && p1X !== undefined && p2X !== undefined) nextPhase = 'play';
