@@ -74,6 +74,8 @@
             border: 4px solid var(--gold); outline: 4px solid #000; box-shadow: var(--shadow);
             display: flex; flex-direction: column; gap: 12px;
             position: relative;
+            max-height: 95vh;
+            overflow-y: auto;
         }
 
         .popup-title {
@@ -86,6 +88,14 @@
         .form-control { background: rgba(0,0,0,0.7); border: 2px solid var(--gold); padding: 10px; color: #fff; font-family: inherit; font-size: 13px; outline: none; }
         .form-control:focus { border-color: #fff; }
         
+        /* --- 3.1 UI PEMILIHAN AVATAR --- */
+        .avatar-section { display: none; flex-direction: column; gap: 6px; text-align: center; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px dashed rgba(255,215,0,0.5); }
+        .avatar-section label { font-size: 11px; font-weight: 900; color: var(--gold); text-shadow: 1px 1px 0 #000; text-transform: uppercase; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .avatar-item { width: 100%; aspect-ratio: 1; background: #000; border: 2px solid #555; border-radius: 4px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+        .avatar-item img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-item.selected { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); transform: scale(1.05); }
+
         .btn {
             border: 3px solid var(--gold); outline: 3px solid #000;
             background: linear-gradient(180deg, var(--blue), var(--blue-dark));
@@ -188,6 +198,10 @@
             display: block !important;
             opacity: 1 !important;
         }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; border: 1px solid #000; }
     </style>
 </head>
 <body>
@@ -195,7 +209,7 @@
     <!-- Latar Belakang Terpisah (Bisa dipudarkan) -->
     <div id="bg-container"></div>
 
-    <!-- Tampilan Login (Dari Index 1) -->
+    <!-- Tampilan Login -->
     <div id="auth-wrapper">
         <div class="popup-box">
             <div class="popup-title" id="authTitle">LOGIN AKUN</div>
@@ -204,6 +218,12 @@
                     <label>Username</label>
                     <input type="text" id="authUsername" class="form-control" placeholder="Masukkan username unik">
                 </div>
+                
+                <div class="avatar-section" id="avatarGroup">
+                    <label>Pilih Avatar Anda</label>
+                    <div class="avatar-grid" id="registerAvatarGrid"></div>
+                </div>
+
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="authEmail" class="form-control" required placeholder="nama@email.com">
@@ -221,13 +241,12 @@
             <div style="text-align:center; margin-top:8px;">
                 <a href="#" id="toggleAuthModeBtn" onclick="toggleAuthMode(); return false;" style="color:var(--gold); font-size:12px; text-decoration:none;">Belum punya akun? Daftar di sini</a>
             </div>
-            <!-- Mode Tamu -->
-            <button class="btn" style="margin-top: 10px;" onclick="playAsGuest()">MAIN SEBAGAI TAMU</button>
+            
             <div id="authErrorMsg" style="color: var(--red); font-size: 12px; font-weight: bold; text-align: center; margin-top: 8px;"></div>
         </div>
     </div>
 
-    <!-- Tampilan Loading (Dari Index 2) -->
+    <!-- Tampilan Loading -->
     <div id="loader-wrapper">
         <div class="logo-container"></div>
         <div class="loading-wrapper">
@@ -258,7 +277,29 @@
         let auth, db;
         let authMode = 'login';
         let appLoaded = false;
-        const loadingDuration = 3000; // Durasi emas loading (3 detik)
+        let selectedRegisterAvatar = 'avatar/avatar_01.png'; // Avatar bawaan
+        const loadingDuration = 3000;
+
+        // Inisialisasi Pilihan Avatar
+        function initRegisterAvatars() {
+            const grid = document.getElementById('registerAvatarGrid');
+            grid.innerHTML = '';
+            for(let i=1; i<=12; i++) {
+                let fileName = `avatar/avatar_${i.toString().padStart(2, '0')}.png`;
+                let div = document.createElement('div');
+                div.className = 'avatar-item';
+                if(i === 1) div.classList.add('selected'); // Pilih otomatis avatar pertama
+                
+                div.innerHTML = `<img src="${fileName}" onerror="this.src='characters/bob/idle_1.png'">`;
+                div.onclick = () => {
+                    document.querySelectorAll('#registerAvatarGrid .avatar-item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    selectedRegisterAvatar = fileName;
+                };
+                grid.appendChild(div);
+            }
+        }
+        initRegisterAvatars();
 
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
@@ -278,9 +319,20 @@
                 }
             });
             
-            window.registerUserFB = async (email, password, username, age) => {
+            window.registerUserFB = async (email, password, username, age, avatarUrl) => {
                 const res = await createUserWithEmailAndPassword(auth, email, password);
-                const initialData = { uid: res.user.uid, username: username, email: email, age: parseInt(age), coins: 1000, wins: 0, losses: 0, items: { antidead: 0, stalestill: 0, glidesteps: 0 }, isOnline: true };
+                const initialData = { 
+                    uid: res.user.uid, 
+                    username: username, 
+                    email: email, 
+                    age: parseInt(age), 
+                    profilePic: avatarUrl, // Menyimpan avatar ke profil awal
+                    coins: 1000, 
+                    wins: 0, 
+                    losses: 0, 
+                    items: { antidead: 0, stalestill: 0, glidesteps: 0 }, 
+                    isOnline: true 
+                };
                 await setDoc(doc(db, "users", res.user.uid), initialData);
             };
             
@@ -290,7 +342,7 @@
 
         } catch(err) {
             console.warn("Firebase Init Error:", err);
-            document.getElementById('authErrorMsg').innerText = "Koneksi Firebase gagal. Gunakan Mode Tamu.";
+            document.getElementById('authErrorMsg').innerText = "Koneksi Firebase gagal. Periksa koneksi internet Anda.";
         }
 
         // Fungsi Toggle Auth Mode
@@ -298,8 +350,12 @@
             authMode = authMode === 'login' ? 'register' : 'login';
             document.getElementById('authForm').reset();
             document.getElementById('authTitle').innerText = authMode === 'login' ? 'LOGIN AKUN' : 'DAFTAR AKUN BARU';
+            
+            // Atur Visibilitas Input Berdasarkan Mode
             document.getElementById('usernameGroup').style.display = authMode === 'login' ? 'none' : 'flex';
             document.getElementById('ageGroup').style.display = authMode === 'login' ? 'none' : 'flex';
+            document.getElementById('avatarGroup').style.display = authMode === 'login' ? 'none' : 'flex';
+            
             document.getElementById('authSubmitBtn').innerText = authMode === 'login' ? 'MASUK' : 'DAFTAR SEKARANG';
             document.getElementById('toggleAuthModeBtn').innerText = authMode === 'login' ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login di sini';
             document.getElementById('authErrorMsg').innerText = "";
@@ -324,7 +380,7 @@
             btn.innerText = "MEMPROSES...";
             try {
                 if (authMode === 'register') {
-                    await window.registerUserFB(email, password, username, age);
+                    await window.registerUserFB(email, password, username, age, selectedRegisterAvatar);
                 } else {
                     await window.loginUserFB(email, password);
                 }
@@ -332,14 +388,6 @@
                 document.getElementById('authErrorMsg').innerText = err.message;
                 btn.disabled = false;
                 btn.innerText = authMode === 'login' ? 'MASUK' : 'DAFTAR SEKARANG';
-            }
-        };
-
-        // Fungsi Bermain Sebagai Tamu
-        window.playAsGuest = function() {
-            if(!appLoaded) {
-                appLoaded = true;
-                startLoadingSequence();
             }
         };
 
