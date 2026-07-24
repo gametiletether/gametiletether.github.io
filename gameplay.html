@@ -487,13 +487,13 @@
       if (gameState.pendingItemAnim) { statePayload.itemAnim = gameState.pendingItemAnim; gameState.pendingItemAnim = null; }
       if (gameState.pendingSfx) { statePayload.lastSfx = gameState.pendingSfx; gameState.pendingSfx = null; }
       
-      const challengerUid = gameState.matchData.challengerUid;
-      const targetUid = gameState.matchData.targetUid;
-      
       let nextTurnUid = '';
-      if (gameState.phase === 'place') {
-          nextTurnUid = (gameState.turn === 0) ? gameState.players[1].uid : gameState.players[0].uid;
+      
+      if (nextPhase === 'play' && gameState.phase === 'place') {
+          // Fase beralih dari place ke play, giliran selalu jatuh ke Challenger (P1)
+          nextTurnUid = gameState.matchData.challengerUid;
       } else {
+          // Normal flow: berikan giliran ke lawan, kecuali bila menggunakan item (keepTurn)
           nextTurnUid = keepTurn ? gameState.players[0].uid : gameState.players[1].uid;
       }
       
