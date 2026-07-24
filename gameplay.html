@@ -294,11 +294,12 @@
       
       const myUid = isChallenger ? matchData.challengerUid : matchData.targetUid;
       const oppUid = isChallenger ? matchData.targetUid : matchData.challengerUid;
-      const oppChar = isChallenger ? matchData.targetChar : matchData.challengerChar;
+      const myChar = isChallenger ? (matchData.challengerChar || window.userData.selectedChar || 'bob') : (matchData.targetChar || window.userData.selectedChar || 'bob');
+      const oppChar = isChallenger ? (matchData.targetChar || 'alice') : (matchData.challengerChar || 'alice');
       
       gameState.players = [ 
-          { name: window.userData.selectedChar || 'bob', x: null, y: null, pose: 'idle', uid: myUid }, 
-          { name: oppChar || 'alice', x: null, y: null, pose: 'idle', uid: oppUid } 
+          { name: myChar, x: null, y: null, pose: 'idle', uid: myUid }, 
+          { name: oppChar, x: null, y: null, pose: 'idle', uid: oppUid } 
       ];
       
       initGameOnline(); 
@@ -322,7 +323,7 @@
           let prevPhase = gameState.phase; 
           gameState.phase = data.gameState.phase; 
           
-          let currentTurnUid = data.currentTurnUid || (isChallenger ? localUid : matchData.challengerUid);
+          let currentTurnUid = data.currentTurnUid || matchData.challengerUid;
           gameState.turn = (currentTurnUid === localUid) ? 0 : 1; 
           gameState.burned = new Map(JSON.parse(data.gameState.burnedArr || "[]"));
           
@@ -334,10 +335,18 @@
           
           let prevP2X = gameState.players[1].x, prevP2Y = gameState.players[1].y;
           
-          gameState.players[0].x = (isChallenger ? data.gameState.p1X : data.gameState.p2X) ?? null;
-          gameState.players[0].y = (isChallenger ? data.gameState.p1Y : data.gameState.p2Y) ?? null;
-          gameState.players[1].x = (isChallenger ? data.gameState.p2X : data.gameState.p1X) ?? null;
-          gameState.players[1].y = (isChallenger ? data.gameState.p2Y : data.gameState.p1Y) ?? null;
+          // Mapping Posisi Berdasarkan Status Peran (Challenger vs Target)
+          if (isChallenger) {
+              gameState.players[0].x = data.gameState.p1X ?? null;
+              gameState.players[0].y = data.gameState.p1Y ?? null;
+              gameState.players[1].x = data.gameState.p2X ?? null;
+              gameState.players[1].y = data.gameState.p2Y ?? null;
+          } else {
+              gameState.players[0].x = data.gameState.p2X ?? null;
+              gameState.players[0].y = data.gameState.p2Y ?? null;
+              gameState.players[1].x = data.gameState.p1X ?? null;
+              gameState.players[1].y = data.gameState.p1Y ?? null;
+          }
           
           if (gameState.phase === 'play' && (gameState.players[1].x !== prevP2X || gameState.players[1].y !== prevP2Y) && prevP2X !== null) {
               gameState.players[1].pose = 'jump'; setTimeout(() => { if (gameState.phase !== 'over') { gameState.players[1].pose = 'idle'; updatePiecesLayer(); } }, 350);
@@ -421,7 +430,7 @@
           if (isOnlinePVP) {
               gameState.turn = 1; 
               updateUI();
-              syncOnlineMove();
+              syncOnlineMove(false);
           } else { 
               gameState.turn = 1; updateUI(); setTimeout(aiPlace, 500); 
           } 
@@ -451,36 +460,48 @@
       p.pose = 'jump'; gameState.turn = 1 - gameState.turn; 
       el.boardWrapper.classList.remove('shake-active'); void el.boardWrapper.offsetWidth; el.boardWrapper.classList.add('shake-active');
       setTimeout(() => { if (gameState.phase !== 'over') { p.pose = 'idle'; updatePiecesLayer(); } }, 350);
-      if (isOnlinePVP) { syncOnlineMove(); updateUI(); } else { checkWin(); updateUI(); if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600); }
+      if (isOnlinePVP) { syncOnlineMove(false); updateUI(); } else { checkWin(); updateUI(); if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600); }
     }
     
     async function syncOnlineMove(keepTurn = false) {
       if(!window.isFirebaseReady) return;
-      const p1X = (gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x);
-      const p1Y = (gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y);
-      const p2X = (gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x);
-      const p2Y = (gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y);
       
-      const safeP1X = p1X !== null && p1X !== undefined ? p1X : null;
-      const safeP1Y = p1Y !== null && p1Y !== undefined ? p1Y : null;
-      const safeP2X = p2X !== null && p2X !== undefined ? p2X : null;
-      const safeP2Y = p2Y !== null && p2Y !== undefined ? p2Y : null;
-
+      let p1X = gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x;
+      let p1Y = gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y;
+      let p2X = gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x;
+      let p2Y = gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y;
+      
       let nextPhase = gameState.phase; 
-      if (gameState.phase === 'place' && safeP1X !== null && safeP2X !== null) nextPhase = 'play';
+      if (gameState.phase === 'place' && p1X !== null && p1X !== undefined && p2X !== null && p2X !== undefined) nextPhase = 'play';
       if (gameState.phase !== 'play' && nextPhase === 'play') unifiedAudio.play.play().catch(()=>{});
       
-      const statePayload = { phase: nextPhase, p1X: safeP1X, p1Y: safeP1Y, p2X: safeP2X, p2Y: safeP2Y, burnedArr: JSON.stringify(Array.from(gameState.burned.entries())) };
+      const statePayload = { 
+          phase: nextPhase, 
+          p1X: p1X !== null && p1X !== undefined ? p1X : null, 
+          p1Y: p1Y !== null && p1Y !== undefined ? p1Y : null, 
+          p2X: p2X !== null && p2X !== undefined ? p2X : null, 
+          p2Y: p2Y !== null && p2Y !== undefined ? p2Y : null, 
+          burnedArr: JSON.stringify(Array.from(gameState.burned.entries())) 
+      };
+      
       if (gameState.pendingItemAnim) { statePayload.itemAnim = gameState.pendingItemAnim; gameState.pendingItemAnim = null; }
       if (gameState.pendingSfx) { statePayload.lastSfx = gameState.pendingSfx; gameState.pendingSfx = null; }
       
-      const opponentUid = gameState.players[1].uid; 
-      const nextTurnUid = keepTurn ? gameState.players[0].uid : opponentUid;
+      const challengerUid = gameState.matchData.challengerUid;
+      const targetUid = gameState.matchData.targetUid;
+      
+      let nextTurnUid = '';
+      if (gameState.phase === 'place') {
+          nextTurnUid = (gameState.turn === 0) ? gameState.players[1].uid : gameState.players[0].uid;
+      } else {
+          nextTurnUid = keepTurn ? gameState.players[0].uid : gameState.players[1].uid;
+      }
+      
       await window.updateOnlineGameStateCloud(activeMatchId, statePayload, nextTurnUid);
       
       if (getLegalMoves(0).length === 0 && gameState.phase === 'play') { 
           if (gameState.antideadActive) triggerAntidead(0); 
-          else await window.finishOnlineMatchCloud(activeMatchId, opponentUid); 
+          else await window.finishOnlineMatchCloud(activeMatchId, gameState.players[1].uid); 
       }
     }
     
@@ -568,7 +589,7 @@
         if (isOnlinePVP) { gameState.pendingItemAnim = { type: 'stalestill', x: p.x, y: p.y, ts: Date.now() }; gameState.pendingSfx = { name: 'stalestill', ts: Date.now() }; }
         playItemAnimation(p.x, p.y, 'stalestill', 'red');
         gameState.turn = 1 - gameState.turn; unifiedAudio.click.currentTime = 0; unifiedAudio.click.play().catch(()=>{});
-        if (isOnlinePVP) syncOnlineMove(); else { checkWin(); updateUI(); if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600); }
+        if (isOnlinePVP) syncOnlineMove(false); else { checkWin(); updateUI(); if (gameState.phase === 'play' && gameState.turn === 1) setTimeout(aiMove, 600); }
     }
     
     function updateUI() {
