@@ -109,7 +109,6 @@
         </div>
       </div>
     </div>
-    
     <div class="popup-overlay" id="chatPopup">
       <div class="popup-box" style="max-width: 320px;">
         <div class="popup-title">Kirim Pesan</div>
@@ -120,7 +119,6 @@
         </div>
       </div>
     </div>
-    
     <div class="popup-overlay" id="equipmentModal">
       <div class="popup-box" style="max-width: 320px;">
         <div class="popup-title">ITEMS</div>
@@ -141,7 +139,6 @@
         <button class="btn btn-green" onclick="closeEquipment()" style="margin-top:15px; width: 100%;">SELESAI</button>
       </div>
     </div>
-    
     <div class="popup-overlay" id="gameOverPopup">
       <div class="popup-box">
         <div class="popup-title" id="popupMsg">YOU SURVIVE</div>
@@ -154,7 +151,6 @@
         </div>
       </div>
     </div>
-    
     <div class="popup-overlay" id="rulesPopup">
       <div class="popup-box">
         <div class="popup-title" style="font-size: 16px;">Aturan Main</div>
@@ -266,7 +262,6 @@
       const params = new URLSearchParams(window.location.search); const mode = params.get('mode');
       const p1Char = window.userData.selectedChar || 'bob'; const pathTheme = window.userData.selectedPath || 'path_01';
       document.documentElement.style.setProperty('--bg-img', `url('paths/${pathTheme}.png')`);
-      
       if (mode === 'online') {
         isOnlinePVP = true; activeMatchId = params.get('matchId'); const isChallenger = params.get('isChallenger') === 'true';
         const matchData = JSON.parse(localStorage.getItem('tiletether_match_data') || '{}');
@@ -292,8 +287,8 @@
       
       gameState = { size: 10, phase: 'place', turn: 0, burned: new Map(), players: [], tick: 0, pathTheme: window.userData.selectedPath || 'path_01', startTime: Date.now(), isOnline: true, isChallenger: isChallenger, matchData: matchData, stalestillUsed: false, lastChatTs: 0, lastSfxTs: 0, pendingSfx: null };
       
-      const myUid = isChallenger ? matchData.challengerUid : matchData.targetUid;
-      const oppUid = isChallenger ? matchData.targetUid : matchData.challengerUid;
+      const myUid = isChallenger ? matchData.challengerId : matchData.targetId;
+      const oppUid = isChallenger ? matchData.targetId : matchData.challengerId;
       const myChar = isChallenger ? (matchData.challengerChar || window.userData.selectedChar || 'bob') : (matchData.targetChar || window.userData.selectedChar || 'bob');
       const oppChar = isChallenger ? (matchData.targetChar || 'alice') : (matchData.challengerChar || 'alice');
       
@@ -307,35 +302,26 @@
       
       matchListenerUnsub = window.listenOnlineMatchState(activeMatchId, (data) => {
         const localUid = gameState.players[0].uid;
-        
         if (data.lastChat && data.lastChat.ts > (gameState.lastChatTs || 0)) {
            gameState.lastChatTs = data.lastChat.ts;
            if (data.lastChat.uid !== localUid) displayChatBubble(1, data.lastChat.text);
         }
-        
         if (data.gameState) {
           if (data.gameState.lastSfx && data.gameState.lastSfx.ts > (gameState.lastSfxTs || 0)) {
               gameState.lastSfxTs = data.gameState.lastSfx.ts;
               let sfxName = data.gameState.lastSfx.name;
               if (unifiedAudio[sfxName]) { unifiedAudio[sfxName].currentTime = 0; unifiedAudio[sfxName].play().catch(()=>{}); }
           }
-          
           let prevPhase = gameState.phase; 
           gameState.phase = data.gameState.phase; 
-          
-          let currentTurnUid = data.currentTurnUid || matchData.challengerUid;
+          let currentTurnUid = data.currentTurnUid || matchData.challengerId;
           gameState.turn = (currentTurnUid === localUid) ? 0 : 1; 
           gameState.burned = new Map(JSON.parse(data.gameState.burnedArr || "[]"));
-          
           if (prevPhase !== 'play' && gameState.phase === 'play') unifiedAudio.play.play().catch(()=>{});
-          
           if (data.gameState.itemAnim && data.gameState.itemAnim.ts > (gameState.lastItemEventTs || 0)) {
               gameState.lastItemEventTs = data.gameState.itemAnim.ts; let anim = data.gameState.itemAnim; let glowColor = anim.type === 'antidead' ? 'gold' : 'red'; playItemAnimation(anim.x, anim.y, anim.type, glowColor);
           }
-          
           let prevP2X = gameState.players[1].x, prevP2Y = gameState.players[1].y;
-          
-          // Mapping Posisi Berdasarkan Status Peran (Challenger vs Target)
           if (isChallenger) {
               gameState.players[0].x = data.gameState.p1X ?? null;
               gameState.players[0].y = data.gameState.p1Y ?? null;
@@ -347,12 +333,10 @@
               gameState.players[1].x = data.gameState.p1X ?? null;
               gameState.players[1].y = data.gameState.p1Y ?? null;
           }
-          
           if (gameState.phase === 'play' && (gameState.players[1].x !== prevP2X || gameState.players[1].y !== prevP2Y) && prevP2X !== null) {
               gameState.players[1].pose = 'jump'; setTimeout(() => { if (gameState.phase !== 'over') { gameState.players[1].pose = 'idle'; updatePiecesLayer(); } }, 350);
           }
           updateUI();
-          
           if (gameState.phase === 'play' && gameState.turn === 0 && gameState.players[0].x !== null) { 
               if (getLegalMoves(0).length === 0) { 
                   if (gameState.antideadActive) triggerAntidead(0); 
@@ -465,12 +449,10 @@
     
     async function syncOnlineMove(keepTurn = false) {
       if(!window.isFirebaseReady) return;
-      
       let p1X = gameState.isChallenger ? gameState.players[0].x : gameState.players[1].x;
       let p1Y = gameState.isChallenger ? gameState.players[0].y : gameState.players[1].y;
       let p2X = gameState.isChallenger ? gameState.players[1].x : gameState.players[0].x;
       let p2Y = gameState.isChallenger ? gameState.players[1].y : gameState.players[0].y;
-      
       let nextPhase = gameState.phase; 
       if (gameState.phase === 'place' && p1X !== null && p1X !== undefined && p2X !== null && p2X !== undefined) nextPhase = 'play';
       if (gameState.phase !== 'play' && nextPhase === 'play') unifiedAudio.play.play().catch(()=>{});
@@ -488,12 +470,9 @@
       if (gameState.pendingSfx) { statePayload.lastSfx = gameState.pendingSfx; gameState.pendingSfx = null; }
       
       let nextTurnUid = '';
-      
       if (nextPhase === 'play' && gameState.phase === 'place') {
-          // Fase beralih dari place ke play, giliran selalu jatuh ke Challenger (P1)
-          nextTurnUid = gameState.matchData.challengerUid;
+          nextTurnUid = gameState.matchData.challengerId;
       } else {
-          // Normal flow: berikan giliran ke lawan, kecuali bila menggunakan item (keepTurn)
           nextTurnUid = keepTurn ? gameState.players[0].uid : gameState.players[1].uid;
       }
       
